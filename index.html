@@ -427,6 +427,20 @@ function endScreen(){
 function makeCode(){ let c=""; for(let i=0;i<4;i++) c+=CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)]; return c; }
 function peerId(code){ return "yjbam-room-"+code.toLowerCase(); }
 
+/* STUN + TURN relay fallback for devices on cellular or strict networks */
+const PEER_OPTS = {config:{iceServers:[
+  {urls:"stun:stun.cloudflare.com:3478"},
+  {urls:"turn:openrelay.metered.ca:80", username:"openrelayproject", credential:"openrelayproject"},
+  {urls:"turn:openrelay.metered.ca:443", username:"openrelayproject", credential:"openrelayproject"}
+]}};
+
+/* Keep the screen awake so the host doesn't silently drop off when a phone locks */
+let wakeLock=null;
+async function keepAwake(){
+  try{ if(navigator.wakeLock) wakeLock = await navigator.wakeLock.request("screen"); }catch(e){}
+}
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible") keepAwake(); });
+
 function broadcast(){
   snap = HostGame.snapshot(G);
   const msg = {t:"state", snap};
@@ -442,12 +456,14 @@ function lockedThisPhaseReset(){
 function startHost(){
   role="host"; roomCode=makeCode();
   banner="";
-  peer = new Peer(peerId(roomCode));
+  keepAwake();
+  peer = new Peer(peerId(roomCode), PEER_OPTS);
   peer.on("open", ()=>{
     G = HostGame.create(myName);
     myIdx = 0;
     broadcast();
   });
+  peer.on("disconnected", ()=>{ try{ peer.reconnect(); }catch(e){} });
   peer.on("error", e=>{
     if(String(e.type)==="unavailable-id"){ startHost(); return; } // rare code collision → retry
     banner="Connection error: "+e.type+". Check your internet connection."; render();
@@ -476,7 +492,9 @@ function handleClientMsg(conn, d){
 
 function startJoin(code){
   role="client"; roomCode=code; banner="";
-  peer = new Peer();
+  keepAwake();
+  peer = new Peer(PEER_OPTS);
+  peer.on("disconnected", ()=>{ try{ peer.reconnect(); }catch(e){} });
   peer.on("open", ()=>{
     hostConn = peer.connect(peerId(code), {reliable:true});
     let joined=false;
@@ -487,10 +505,12 @@ function startJoin(code){
       else if(d.t==="state"){ snap=d.snap; lockedThisPhaseReset(); render(); }
     });
     hostConn.on("close", ()=>{ banner="Lost connection to the host."; render(); });
-    setTimeout(()=>{ if(!joined && !banner){ banner="Could not find room "+code+". Check the code and try again."; snap=null; landing(); } }, 8000);
+    setTimeout(()=>{ if(!joined && !banner){ banner="Could not reach room "+code+". Make sure the host's screen is ON with the game page open, then try again."; snap=null; landing(); } }, 10000);
   });
   peer.on("error", e=>{
-    banner = (String(e.type)==="peer-unavailable") ? "Room "+code+" not found. Check the code." : "Connection error: "+e.type;
+    banner = (String(e.type)==="peer-unavailable")
+      ? "Room "+code+" not found. Double-check the code — and if the host's screen went to sleep, the room closed: the host should tap 'Host a New Game' for a fresh code."
+      : "Connection error: "+e.type;
     snap=null; landing();
   });
 }
