@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>You Just Became a MILLIONAIRE® — Multi-Device Prototype</title>
-<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<title>You Just Became a MILLIONAIRE® — Design Review (all screens)</title>
 <style>
   :root{
     --navy:#101c4f; --navy-deep:#0a1138; --navy-card:#16246b;
@@ -87,11 +86,19 @@
   .lobby-player{display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; background:rgba(255,255,255,.05); margin-top:8px;}
   .lobby-player .dot{width:9px; height:9px; border-radius:50%; background:var(--green);}
   footer{font-size:.7rem; color:rgba(236,224,184,.45); text-align:center; padding:12px;}
+  #gallery{width:100%;}
+  .gallery-intro{max-width:560px; margin:26px auto 0; text-align:center; padding:0 14px;}
+  .gallery-intro h1{font-family:"Trebuchet MS",sans-serif; font-weight:700; color:var(--gold-soft); font-size:1.5rem; letter-spacing:.03em;}
+  .gallery-intro p{color:rgba(236,224,184,.8); font-size:.95rem; line-height:1.55; margin-top:8px;}
+  .shot-wrap{margin:34px auto 0; max-width:560px; padding:0 8px;}
+  .shot-label{font-size:.9rem; color:var(--gold); letter-spacing:.04em; margin:0 6px 8px; font-weight:700;}
+  .shot-note{color:rgba(236,224,184,.6); font-weight:400;}
+  .shot{border:1.5px dashed rgba(232,217,160,.45); border-radius:18px; padding:4px 12px 18px; pointer-events:none;}
 </style>
 </head>
 <body>
-<div id="app"></div>
-<footer>You Just Became a MILLIONAIRE® &nbsp;•&nbsp; © Time for Two, Inc. 1991, 2016, 2023, 2026 &nbsp;•&nbsp; Multi-device prototype — Draft 10 deck</footer>
+<div id="gallery"></div><div id="app" style="display:none"></div>
+<footer>You Just Became a MILLIONAIRE® &nbsp;•&nbsp; © Time for Two, Inc. 1991, 2016, 2023, 2026 &nbsp;•&nbsp; Design review — every screen, sample data, nothing clickable</footer>
 
 <script id="game-logic">
 /* ============ PURE GAME LOGIC + HOST STATE MACHINE (no DOM) ============ */
@@ -252,7 +259,7 @@ if(typeof module!=="undefined") module.exports = {CARDS, GameLogic, HostGame, ST
 <script id="net-ui">
 /* ============ NETWORK + UI LAYER ============ */
 (function(){
-if(typeof document==="undefined" || typeof Peer==="undefined") return;
+if(typeof document==="undefined") return;
 const app = document.getElementById("app");
 const $ = h => { app.innerHTML = h; window.scrollTo(0,0); };
 const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
@@ -589,7 +596,47 @@ window.UI = {
     broadcast();
   }
 };
-introScreen();
+/* ---------- DESIGN REVIEW GALLERY (replaces live game startup) ---------- */
+const gallery = document.getElementById("gallery");
+gallery.innerHTML = `<div class="gallery-intro">
+  <h1>Design Review — every screen of the game</h1>
+  <p>Updated with your 7/22 batch: Draft 11 cards, your Directions on Screen 1, shinier and larger logo, tagline removed,
+  Trebuchet MS throughout, darker card quotes. Nothing here is clickable — note further requests by screen number.</p>
+</div>`;
+function shot(num, title, note, setup){
+  banner=""; pendingChoice=null; pendingBet=null; quickMode=false;
+  setup();
+  const sec = document.createElement("section");
+  sec.className="shot-wrap";
+  sec.innerHTML = `<div class="shot-label">Screen ${num} — ${title}${note?`<span class="shot-note"> · ${note}</span>`:""}</div><div class="shot">${app.innerHTML}</div>`;
+  gallery.appendChild(sec);
+}
+const P3 = [
+  {name:"Michael", balance:23, eliminated:false, connected:true},
+  {name:"Barbara", balance:19, eliminated:false, connected:true},
+  {name:"Pat", balance:18, eliminated:false, connected:true}
+];
+const baseSnap = {phase:"lobby", players:P3, millIdx:0, cardIdx:0, totalCards:24, card:CARDS[0], answered:false, betDone:{}, reveal:null, winners:null};
+
+shot(1, "Introduction page", "your Directions text", ()=>{ role=null; snap=null; myIdx=0; introScreen(); });
+shot(2, "Welcome page", "host or join", ()=>{ role=null; snap=null; myIdx=0; landing(); });
+shot(3, "Lobby — host's view", "room code, player list, quick-game option", ()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap}; render(); });
+shot(4, "The Millionaire's card", "Draft 11 Card 1 (option B selected)", ()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"answer"}; pendingChoice=1; render(); });
+shot(5, "Waiting for the Millionaire", "what everyone else sees meanwhile", ()=>{ role="client"; myIdx=1; snap={...baseSnap, phase:"answer"}; render(); });
+shot(6, "Betting screen", "guess + bet (option B and $2M selected)", ()=>{ role="client"; myIdx=1; snap={...baseSnap, phase:"betting", answered:true}; pendingChoice=1; pendingBet=2; render(); });
+shot(7, "Waiting for bets", "the Millionaire watches bets lock in", ()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"betting", answered:true, betDone:{1:true}}; render(); });
+shot(8, "The reveal", "answer shown, wins and losses settled", ()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"reveal",
+  reveal:{answer:1, millIdx:0, results:[
+    {idx:1, name:"Barbara", choice:1, bet:2, won:true,  balance:21, out:false},
+    {idx:2, name:"Pat",     choice:3, bet:3, won:false, balance:15, out:false}
+  ]}}; render(); });
+shot(9, "End of game — Grand Prize", "certificate + larger money rain (animated in the real game)", ()=>{ role="host"; myIdx=0; snap={phase:"end",
+  players:[
+    {name:"Michael", balance:31, eliminated:false, connected:true},
+    {name:"Barbara", balance:24, eliminated:false, connected:true},
+    {name:"Pat",     balance:5,  eliminated:false, connected:true}
+  ], winners:["Michael"], totalCards:24, cardIdx:23, millIdx:0, betDone:{}, card:null, reveal:null}; render(); });
+shot(10, "Error message", "example of how problems are reported", ()=>{ role=null; snap=null; banner="Room KQ7M not found. Double-check the code — and if the host\u2019s screen went to sleep, the room closed: the host should tap \u2018Host a New Game\u2019 for a fresh code."; landing(); });
 })();
 </script>
 </body>
