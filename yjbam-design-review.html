@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>You Just Became a MILLIONAIRE® — Design Review (all screens)</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MILLIONAIRE">
+<meta name="theme-color" content="#081E3B">
 <style>
   :root{
     --navy:#081E3B; --navy-deep:#081E3B; --navy-card:#0E2A4F;
@@ -142,7 +150,8 @@ const CARDS = [
 ];
 
 const START_BALANCE = 20; // millions
-const ROUNDS_BY_PLAYERS = {3:8, 4:6, 5:5, 6:4};
+/* First-round playtests: every player takes exactly 4 turns as the Millionaire. */
+const ROUNDS_BY_PLAYERS = {3:4, 4:4, 5:4, 6:4};
 
 const GameLogic = {
   roundsFor(n){ return ROUNDS_BY_PLAYERS[n]; },
@@ -315,7 +324,7 @@ function introScreen(){
     <p class="muted" style="margin-top:8px">The Host goes first as the Millionaire; players then take turns being the Millionaire. Each card includes a short quote, a question, and 2–4 answer choices. The Millionaire reads the entire card aloud — including the quote — then secretly selects the answer that best fits them. Remember: now that you're rich, you can afford to be honest.</p>
     <p class="muted" style="margin-top:8px">The other players then bet $1M, $2M, or $3M on what each Player thinks the Millionaire chose. Guess correctly and you receive the amount of your bet from the Bank; guess incorrectly and you lose it.</p>
     <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">End of game.</b> After the final card is played, the player with the most money wins. Players who lose all their money are out of the game!</p>
-    <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">Game length.</b> Full game (3–6 players): about 24 cards, approximately 45 minutes. Quick game: 3 cards for a fast preview.</p>
+    <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">Game length.</b> Each player takes 4 turns as the Millionaire — 12 to 24 cards depending on the number of players (roughly 25 to 45 minutes).</p>
     <button class="btn-gold" onclick="UI.toLanding()">Continue →</button>
   </div>`);
 }
@@ -348,11 +357,7 @@ function lobbyScreen(){
     <p class="muted" style="text-align:center">Others: open this same file (or page) on your device,<br>enter your name and this code, and tap <i>Join</i>.</p>
     <div style="margin-top:16px">${rows}</div>
     <p class="muted" style="text-align:center; margin-top:12px">${info}</p>
-    ${role==="host" ? `
-      <label style="display:flex; gap:8px; justify-content:center; align-items:center; margin-top:14px; font-size:.88rem; color:rgba(236,224,184,.8); cursor:pointer">
-        <input type="checkbox" ${quickMode?"checked":""} onchange="UI.toggleQuick(this.checked)"> Quick test — 3 cards, just to see the ending
-      </label>
-      <button class="btn-gold" ${n<3?"disabled":""} onclick="UI.start()">Start the Game</button>`
+    ${role==="host" ? `<button class="btn-gold" ${n<3?"disabled":""} onclick="UI.start()">Start the Game</button>`
                     : `<div class="waiting"><p class="muted dots">Waiting for the host to start</p></div>`}
     ${bannerHtml()}
   </div>`);
@@ -589,8 +594,7 @@ window.UI = {
     startJoin(code);
     $(brand(false)+`<div class="panel waiting"><p class="muted dots">Joining room ${esc(code)}</p></div>`);
   },
-  start(){ if(role==="host" && HostGame.start(G, Math.random, quickMode)) broadcast(); },
-  toggleQuick(v){ quickMode = v; },
+  start(){ if(role==="host" && HostGame.start(G)) broadcast(); },
   pick(i){ pendingChoice=i; render(); },
   pickBet(v){ pendingBet=v; render(); },
   lockAnswer(){
@@ -613,12 +617,11 @@ window.UI = {
 const gallery = document.getElementById("gallery");
 gallery.innerHTML = `<div class="gallery-intro">
   <h1>Design Review — every screen of the game</h1>
-  <p>Updated 7/26 to the recalculated specs: new palette (#081E3B navy, #FFC72C bright gold, #E0B01E border gold,
-  #F7F1E3 cream), larger corner radius, spec widths for the cream panel / answer boxes / lock button.
-  Note further requests by screen number.</p>
+  <p>Updated 7/26: fixed length — every player takes 4 turns as the Millionaire (12–24 cards by player count);
+  the quick-game option is gone from the lobby. Note further requests by screen number.</p>
 </div>`;
 function shot(num, title, note, setup){
-  banner=""; pendingChoice=null; pendingBet=null; quickMode=false;
+  banner=""; pendingChoice=null; pendingBet=null;
   setup();
   const sec = document.createElement("section");
   sec.className="shot-wrap";
@@ -630,12 +633,12 @@ const P3 = [
   {name:"Barbara", balance:19, eliminated:false, connected:true},
   {name:"Pat", balance:18, eliminated:false, connected:true}
 ];
-const baseSnap = {phase:"lobby", players:P3, millIdx:0, cardIdx:0, totalCards:24, card:CARDS[0], answered:false, betDone:{}, reveal:null, winners:null};
+const baseSnap = {phase:"lobby", players:P3, millIdx:0, cardIdx:0, totalCards:12, card:CARDS[0], answered:false, betDone:{}, reveal:null, winners:null};
 
-shot(1, "Introduction page", "your Directions text", ()=>{ role=null; snap=null; myIdx=0; introScreen(); });
+shot(1, "Introduction page", "your Directions text, updated game length", ()=>{ role=null; snap=null; myIdx=0; introScreen(); });
 shot(2, "Welcome page", "host or join", ()=>{ role=null; snap=null; myIdx=0; landing(); });
-shot(3, "Lobby — host's view", "room code, player list, quick-game option", ()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap}; render(); });
-shot(4, "The Millionaire's card", "recalculated specs applied (option B selected)", ()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"answer"}; pendingChoice=1; render(); });
+shot(3, "Lobby — host's view", "room code and player list (no quick-game option)", ()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap}; render(); });
+shot(4, "The Millionaire's card", "option B selected", ()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"answer"}; pendingChoice=1; render(); });
 shot(5, "Waiting for the Millionaire", "what everyone else sees meanwhile", ()=>{ role="client"; myIdx=1; snap={...baseSnap, phase:"answer"}; render(); });
 shot(6, "Betting screen", "guess + bet (option B and $2M selected)", ()=>{ role="client"; myIdx=1; snap={...baseSnap, phase:"betting", answered:true}; pendingChoice=1; pendingBet=2; render(); });
 shot(7, "Waiting for bets", "the Millionaire watches bets lock in", ()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"betting", answered:true, betDone:{1:true}}; render(); });
@@ -649,7 +652,7 @@ shot(9, "End of game — Grand Prize", "certificate + money rain (animated in th
     {name:"Michael", balance:31, eliminated:false, connected:true},
     {name:"Barbara", balance:24, eliminated:false, connected:true},
     {name:"Pat",     balance:5,  eliminated:false, connected:true}
-  ], winners:["Michael"], totalCards:24, cardIdx:23, millIdx:0, betDone:{}, card:null, reveal:null}; render(); });
+  ], winners:["Michael"], totalCards:12, cardIdx:11, millIdx:0, betDone:{}, card:null, reveal:null}; render(); });
 shot(10, "Error message", "example of how problems are reported", ()=>{ role=null; snap=null; banner="Room KQ7M not found. Double-check the code — and if the host\u2019s screen went to sleep, the room closed: the host should tap \u2018Host a New Game\u2019 for a fresh code."; landing(); });
 })();
 </script>

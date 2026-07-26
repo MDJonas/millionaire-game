@@ -143,7 +143,8 @@ const CARDS = [
 ];
 
 const START_BALANCE = 20; // millions
-const ROUNDS_BY_PLAYERS = {3:8, 4:6, 5:5, 6:4};
+/* First-round playtests: every player takes exactly 4 turns as the Millionaire. */
+const ROUNDS_BY_PLAYERS = {3:4, 4:4, 5:4, 6:4};
 
 const GameLogic = {
   roundsFor(n){ return ROUNDS_BY_PLAYERS[n]; },
@@ -316,7 +317,7 @@ function introScreen(){
     <p class="muted" style="margin-top:8px">The Host goes first as the Millionaire; players then take turns being the Millionaire. Each card includes a short quote, a question, and 2–4 answer choices. The Millionaire reads the entire card aloud — including the quote — then secretly selects the answer that best fits them. Remember: now that you're rich, you can afford to be honest.</p>
     <p class="muted" style="margin-top:8px">The other players then bet $1M, $2M, or $3M on what each Player thinks the Millionaire chose. Guess correctly and you receive the amount of your bet from the Bank; guess incorrectly and you lose it.</p>
     <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">End of game.</b> After the final card is played, the player with the most money wins. Players who lose all their money are out of the game!</p>
-    <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">Game length.</b> Full game (3–6 players): about 24 cards, approximately 45 minutes. Quick game: 3 cards for a fast preview.</p>
+    <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">Game length.</b> Each player takes 4 turns as the Millionaire — 12 to 24 cards depending on the number of players (roughly 25 to 45 minutes).</p>
     <button class="btn-gold" onclick="UI.toLanding()">Continue →</button>
   </div>`);
 }
@@ -349,11 +350,7 @@ function lobbyScreen(){
     <p class="muted" style="text-align:center">Others: open this same file (or page) on your device,<br>enter your name and this code, and tap <i>Join</i>.</p>
     <div style="margin-top:16px">${rows}</div>
     <p class="muted" style="text-align:center; margin-top:12px">${info}</p>
-    ${role==="host" ? `
-      <label style="display:flex; gap:8px; justify-content:center; align-items:center; margin-top:14px; font-size:.88rem; color:rgba(236,224,184,.8); cursor:pointer">
-        <input type="checkbox" ${quickMode?"checked":""} onchange="UI.toggleQuick(this.checked)"> Quick test — 3 cards, just to see the ending
-      </label>
-      <button class="btn-gold" ${n<3?"disabled":""} onclick="UI.start()">Start the Game</button>`
+    ${role==="host" ? `<button class="btn-gold" ${n<3?"disabled":""} onclick="UI.start()">Start the Game</button>`
                     : `<div class="waiting"><p class="muted dots">Waiting for the host to start</p></div>`}
     ${bannerHtml()}
   </div>`);
@@ -590,8 +587,7 @@ window.UI = {
     startJoin(code);
     $(brand(false)+`<div class="panel waiting"><p class="muted dots">Joining room ${esc(code)}</p></div>`);
   },
-  start(){ if(role==="host" && HostGame.start(G, Math.random, quickMode)) broadcast(); },
-  toggleQuick(v){ quickMode = v; },
+  start(){ if(role==="host" && HostGame.start(G)) broadcast(); },
   pick(i){ pendingChoice=i; render(); },
   pickBet(v){ pendingBet=v; render(); },
   lockAnswer(){
