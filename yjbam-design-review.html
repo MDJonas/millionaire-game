@@ -6,14 +6,14 @@
 <title>You Just Became a MILLIONAIRE® — Design Review (all screens)</title>
 <style>
   :root{
-    --navy:#101c4f; --navy-deep:#0a1138; --navy-card:#16246b;
-    --cream:#ece0b8; --gold:#f5b301; --gold-soft:#e8d9a0;
+    --navy:#081E3B; --navy-deep:#081E3B; --navy-card:#0E2A4F;
+    --cream:#F5EFE2; --cream-panel:#F7F1E3; --gold:#FFC72C; --gold2:#E0B01E; --gold-soft:#EFE3C2;
     --orange:#f5a623; --green:#4cd97b; --red:#ff6b6b;
-    --ink:#1a1a2e;
+    --ink:#0A1A2F;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{
-    background:radial-gradient(ellipse at 50% 0%, #17256e 0%, var(--navy-deep) 70%);
+    background:#081E3B;
     min-height:100vh; color:var(--cream);
     font-family:"Trebuchet MS", "Segoe UI", Helvetica, Arial, sans-serif;
     display:flex; flex-direction:column; align-items:center;
@@ -23,40 +23,44 @@
   .brand .script{font-family:"Snell Roundhand","Brush Script MT","Segoe Script",cursive; font-size:1.55rem; color:#f7ecc4;}
   .brand .title{font-family:Georgia,"Times New Roman",serif; letter-spacing:.12em; font-size:2.3rem; font-weight:400;
     color:#f5d576;
-    background:linear-gradient(180deg,#fff7d6 0%,#f7dd8a 30%,#e9b421 55%,#fff3b0 80%,#d99e00 100%);
+    background:linear-gradient(180deg,#FFF3C8 0%,#FFD75E 30%,#FFC72C 55%,#FFF0B0 80%,#E0B01E 100%);
     -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
     filter:drop-shadow(0 1px 7px rgba(247,221,138,.4));}
   .brand .title sup{font-size:.85rem;}
   .brand .tagline{color:var(--orange); font-style:italic; font-size:.95rem; margin-top:3px;}
-  .panel{background:rgba(255,255,255,.04); border:1px solid rgba(232,217,160,.25); border-radius:14px; padding:20px; margin-top:16px;}
+  .panel{background:rgba(255,255,255,.04); border:1px solid rgba(232,217,160,.25); border-radius:36px; padding:20px 20px 34px; margin-top:16px;}
   h2{font-family:"Trebuchet MS",sans-serif; font-weight:700; color:var(--gold-soft); letter-spacing:.03em; margin-bottom:10px;}
   p.muted{color:rgba(236,224,184,.75); font-size:.94rem; line-height:1.5;}
   button{cursor:pointer; border:none; border-radius:10px; font-size:1rem; font-weight:600; padding:13px 20px; transition:transform .08s, opacity .15s;}
   button:active{transform:scale(.97);}
   button:disabled{opacity:.35; cursor:not-allowed;}
-  .btn-gold{background:linear-gradient(180deg,#ffcf40,#e6a100); color:#231a00; width:100%; margin-top:14px; font-size:1.05rem;}
+  .btn-gold{background:linear-gradient(180deg,#FFD75E,#EFB80D); color:#231a00; width:100%; margin-top:14px; font-size:1.05rem;}
   .btn-ghost{background:transparent; border:1px solid rgba(232,217,160,.4); color:var(--cream); width:100%; margin-top:10px;}
   input[type=text]{width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(232,217,160,.35); background:rgba(255,255,255,.06); color:var(--cream); font-size:1.05rem; outline:none; margin-top:10px;}
   input[type=text]:focus{border-color:var(--gold);}
   .code-display{font-family:"Trebuchet MS",sans-serif; font-size:2.4rem; letter-spacing:.35em; color:var(--gold); text-align:center; margin:12px 0 4px; text-indent:.35em;}
   #scoreboard{display:flex; flex-wrap:wrap; gap:7px; justify-content:center; margin-top:12px;}
-  .chip{background:rgba(255,255,255,.06); border:1px solid rgba(232,217,160,.25); border-radius:20px; padding:5px 12px; font-size:.82rem;}
-  .chip.mill{border-color:var(--gold); background:rgba(245,179,1,.13);}
+  .chip{background:rgba(6,24,47,.75); border:1.5px solid var(--gold2); border-radius:20px; padding:6px 13px; font-size:.84rem; font-weight:600;}
+  .chip.mill{background:rgba(245,179,1,.15); box-shadow:0 0 9px rgba(245,179,1,.35);}
   .chip.out{opacity:.4; text-decoration:line-through;}
   .chip.me{box-shadow:0 0 0 1.5px var(--cream);}
   .chip.gone{opacity:.4; font-style:italic;}
   .chip b{color:var(--gold);}
   .progress{text-align:center; font-size:.78rem; color:rgba(236,224,184,.6); margin-top:8px; letter-spacing:.08em;}
-  .qcard{background:linear-gradient(160deg,#f7f1dd,#ece0b8); color:var(--ink); border-radius:14px; padding:20px; margin-top:12px; box-shadow:0 8px 24px rgba(0,0,0,.4);}
-  .qcard .qhead{font-family:"Trebuchet MS",sans-serif; font-size:.72rem; letter-spacing:.18em; color:#7a6520; text-transform:uppercase; margin-bottom:9px; text-align:center;}
-  .qcard .qtext{font-size:1.08rem; line-height:1.45; font-weight:600;}
-  .qcard .qquote{font-style:italic; font-size:.86rem; color:#3f3210; text-align:center; margin-bottom:8px; line-height:1.4;}
-  .qcard .qby{font-style:normal; font-size:.74rem; color:#5f4d15;}
-  .opt{display:flex; gap:12px; align-items:flex-start; width:100%; text-align:left; background:rgba(255,255,255,.06); border:1.5px solid rgba(232,217,160,.3); color:var(--cream); border-radius:10px; padding:12px 14px; margin-top:9px; font-weight:500; font-size:.95rem;}
+  .qcard{background:var(--cream-panel); color:var(--ink); border-radius:14px; padding:9px; margin:12px auto 0; width:91.5%; box-shadow:0 8px 24px rgba(0,0,0,.45);}
+  .qframe{border:1px solid var(--gold2); border-radius:9px; padding:16px 14px; box-shadow:0 0 0 2px rgba(224,176,30,.18);}
+  .qcard .qquote{font-family:"Trebuchet MS",sans-serif; font-style:italic; font-weight:700; font-size:1.06rem; color:#0A1A2F; text-align:center; line-height:1.45;}
+  .qcard .qby{display:block; text-align:right; font-size:.78rem; color:#5c5647; margin-top:7px; padding-right:6px;}
+  .qsep{display:block; width:84%; max-width:300px; margin:11px auto 10px;}
+  .qcard .qtext{font-size:1.1rem; line-height:1.4; font-weight:700; color:#0A1A2F; text-align:center;}
+  .role-line{margin-top:16px; text-align:center; font-size:1rem; color:var(--cream);}
+  .read-aloud{text-align:center; font-size:.76rem; letter-spacing:.13em; color:var(--gold-soft); margin-top:6px; text-transform:uppercase; font-weight:700;}
+  .opt{display:flex; gap:12px; align-items:center; width:100%; text-align:left; background:var(--navy-card); border:1.2px solid rgba(247,241,227,.6); color:var(--cream); border-radius:26px; padding:11px 14px; margin-top:9px; font-weight:500; font-size:.95rem;}
   .opt .letter{background:var(--gold); color:#231a00; border-radius:50%; min-width:27px; height:27px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.88rem;}
-  .opt.sel{border-color:var(--gold); background:rgba(245,179,1,.16);}
+  .opt.sel{border-color:var(--gold); background:#12395F; box-shadow:0 0 0 1.5px var(--gold);}
+  .btn-lock{text-transform:uppercase; letter-spacing:.06em; width:87%; display:block; margin-left:auto; margin-right:auto;}
   .bets{display:flex; gap:10px; justify-content:center; margin-top:14px;}
-  .bet-chip{width:72px; height:72px; border-radius:50%; font-size:.92rem; font-weight:800; background:radial-gradient(circle at 35% 30%, #ffd968, #c98d00 75%); color:#3a2a00; border:3px dashed rgba(255,255,255,.55);}
+  .bet-chip{width:72px; height:72px; border-radius:50%; font-size:.92rem; font-weight:800; background:radial-gradient(circle at 35% 30%, #FFE08A, #D9A400 75%); color:#3a2a00; border:3px dashed rgba(255,255,255,.55);}
   .bet-chip.sel{outline:4px solid var(--cream); outline-offset:2px;}
   .section-label{margin-top:16px; text-align:center; font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; color:rgba(236,224,184,.65);}
   .waiting{ text-align:center; padding:18px 8px; }
@@ -74,7 +78,7 @@
   .rain{position:absolute; inset:0; pointer-events:none;}
   .drop{position:absolute; top:-56px; font-size:2.2rem; opacity:.85; animation-name:fall; animation-timing-function:linear; animation-iteration-count:infinite;}
   @keyframes fall{ to{ transform:translateY(620px) rotate(300deg); } }
-  .prize-cert{position:relative; background:linear-gradient(160deg,#f7f1dd,#ece0b8); color:var(--ink); border:3px double #b8860b; border-radius:12px; padding:18px 16px; margin:14px auto 0; max-width:420px; box-shadow:0 8px 24px rgba(0,0,0,.4);}
+  .prize-cert{position:relative; background:var(--cream-panel); color:var(--ink); border:3px double var(--gold2); border-radius:12px; padding:18px 16px; margin:14px auto 0; max-width:420px; box-shadow:0 8px 24px rgba(0,0,0,.4);}
   .pc-head{font-family:"Trebuchet MS",sans-serif; letter-spacing:.22em; text-transform:uppercase; font-size:.72rem; color:#7a6520;}
   .pc-title{font-family:"Trebuchet MS",sans-serif; font-size:1.35rem; color:#101c4f; font-weight:700; margin-top:6px;}
   .pc-sub{font-size:.8rem; color:#5f4d15; margin-top:6px; font-style:italic;}
@@ -107,7 +111,7 @@
 const CARDS = [
  {quote:"I literally danced around the living room shouting, ‘I’m rich!’", by:"Anonymous lottery winner", q:"When I realized I was a millionaire, the first thing I did was...", opts:["Jump up and down, barely making sense", "Completely freeze — or possibly faint", "Sit calmly, thinking, “Well, that’s cool.”", "Run out the door shouting, “Let the buying begin!”"]},
  {quote:"I don’t know much about being a millionaire, but I’ll bet I’d be darling at it.", by:"Dorothy Parker", q:"How confident are you that you’d pull off being a millionaire?", opts:["Completely — I’d make it look effortless", "I’d need a rehearsal period to get used to all that attention", "I’d keep waiting for someone to tell me there’d been a mistake", "I’d absolutely pull it off — right until taxes and chaos kicked in"]},
- {quote:"I’ve been rich, and I’ve been poor. Rich is better.", by:"Beatrice Kaufman", q:"To really feel wealthy, I will...", opts:["Announce in a crowded restaurant, “Food and drinks for everyone!”", "Buy one in every color [hire an expert to revamp my wardrobe]", "Keep a full-time masseuse on staff", "Have exotic international foods flown in"]},
+ {quote:"I’ve been rich, and I’ve been poor. Rich is better.", by:"Beatrice Kaufman", q:"To really feel wealthy, I will...", opts:["Announce in a crowded restaurant, “Food and drinks for everyone!”", "Hire a style consultant to upgrade my wardrobe", "Keep a full-time masseuse on staff", "Have exotic international foods flown in"]},
  {quote:"The power of money is the power of choice.", by:"Proverb", q:"The freedom I will enjoy the most is...", opts:["Never working again", "Traveling anytime, anywhere", "Buying whatever I want", "Saying no to things I don’t want to do"]},
  {quote:"The millionaire next door may still be clipping coupons.", by:"Thomas J. Stanley", q:"Even as a millionaire, I will probably still...", opts:["Recalculate the tip in my head, just to be sure", "Open three apps to see who has the better deal", "Say “I can’t afford that” out of habit", "Hoard reward points like treasure"]},
  {quote:"Life isn’t meant to just be lived — it should be celebrated.", by:"Osho", q:"No more paper plates and balloons for my birthday. This year I’m going to...", opts:["Throw a dart at a map and travel to wherever it lands", "Rent out an entire theme park for my friends", "Hire a photographer and glam squad — every angle says “ageless”", "Walk in my ancestors’ footsteps — a heritage trip without the hard parts"]},
@@ -294,8 +298,7 @@ function scoreboard(){
     const crown = (i===snap.millIdx && !p.eliminated && snap.phase!=="lobby" && snap.phase!=="end") ? "👑 " : "";
     return `<span class="${cls}">${crown}${esc(p.name)}${i===myIdx?" (you)":""} <b>${M(p.balance)}</b></span>`;
   }).join("");
-  const prog = snap.totalCards ? `<div class="progress">CARD ${Math.min(snap.cardIdx+1,snap.totalCards)} OF ${snap.totalCards}</div>` : "";
-  return `<div id="scoreboard">${chips}</div>${prog}`;
+  return `<div id="scoreboard">${chips}</div>`;
 }
 function bannerHtml(){ return banner ? `<div class="banner">${esc(banner)}</div>` : ""; }
 
@@ -310,7 +313,7 @@ function introScreen(){
     <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">The game cards.</b> Some card situations may not perfectly match your real life — that's where imagination comes in. Choose the answer that best reflects you.</p>
     <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">How to play.</b> One player is the Host, starts the game, and shares the room code the other players use to sign in. Each player begins with $20 million.</p>
     <p class="muted" style="margin-top:8px">The Host goes first as the Millionaire; players then take turns being the Millionaire. Each card includes a short quote, a question, and 2–4 answer choices. The Millionaire reads the entire card aloud — including the quote — then secretly selects the answer that best fits them. Remember: now that you're rich, you can afford to be honest.</p>
-    <p class="muted" style="margin-top:8px">The other players then bet $1M, $2M, or $3M on what they think the Millionaire chose. Guess correctly and you receive the amount of your bet from the Bank; guess incorrectly and you lose it.</p>
+    <p class="muted" style="margin-top:8px">The other players then bet $1M, $2M, or $3M on what each Player thinks the Millionaire chose. Guess correctly and you receive the amount of your bet from the Bank; guess incorrectly and you lose it.</p>
     <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">End of game.</b> After the final card is played, the player with the most money wins. Players who lose all their money are out of the game!</p>
     <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">Game length.</b> Full game (3–6 players): about 24 cards, approximately 45 minutes. Quick game: 3 cards for a fast preview.</p>
     <button class="btn-gold" onclick="UI.toLanding()">Continue →</button>
@@ -364,8 +367,13 @@ function render(){
   if(snap.phase==="reveal") return revealScreen();
   if(snap.phase==="end") return endScreen();
 }
-function cardHtml(head){
-  return `<div class="qcard"><div class="qhead">★ ${head} ★</div><div class="qquote">“${esc(snap.card.quote)}” <span class="qby">— ${esc(snap.card.by)}</span></div><div class="qtext">${esc(snap.card.q)}</div></div>`;
+function cardHtml(){
+  return `<div class="qcard"><div class="qframe">
+    <div class="qquote">“${esc(snap.card.quote)}”</div>
+    <div class="qby">— ${esc(snap.card.by)}</div>
+    <img class="qsep" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUoAAAAQCAYAAABwSzYgAAACYklEQVR4nO3asWrbQBzH8a9KHsEPEQ+GQA1ZsnXQE2QoKOCtdOvc7p27lW6FCjIUsmvvYlAh0MF6iLyDOuguOQvJOsmSda1/n+UElk9/6f53ujsbRAKSp/EiT+PF3HGIuF7NHYBIzeXcAYjUaaCU0KzQYCmB0UApIVrNHYCI62LuAESsPI0XEbwFdnPHIuLSjFJCcgtcA5s8jW/mDkbEisasLE/jxTrJnprKMa8TqrZ7d0t4eU5zx3tqNg+a7j1P45sIPlMNlADbEj6uk+xXn3rORVeenVPf6+pvY4jgJfHY30Rv3CeK4Mqj3iXV8ml5THD/EPde7bFbjqaExwiuSngcWMUfqrZ1y74KqlwpPM+/jOAOWJZwv06yr27Omc82Dd/bArsSfgCFTfzfafwN82ztZ75xeJ5XV39eg/ZQbbt59iFf9Vw7t77n8upzB/pQvS8UUA3EkUlYm0BDB8cxGueaqmO4pYSj3jbbjvNtsi7Zb8vvJXwyx7cmtzYd192ZpP4JEMFDvU7n2DcHlWdh6ptnh3hPVlomHnbgLI5aejctJ0eY+tuZSlPpY/Bb/8g3fuhv8t4z3J6z10Mz05V5ps8zSthfyTTNKkv4YOot3GVUnsbv7Y8+Jra2a3vnwIA2D7m9B69mRl6x+Gjr676rhGdTbnWNukd5TuovgtD2idqSZeq9nEO6rmUGwC8AJbxp2p/0rWtsbe1tj+vnnLLdfXLv1G39v9FAKcEwfw96AHavk+zd3PGIWPp7kARjnWRPJdwfsewTmYT+cC6hGfIrvMikNFBKaHpv4otMTUtvEZEOfwHjYXBpcLagcQAAAABJRU5ErkJggg==">
+    <div class="qtext">${esc(snap.card.q)}</div>
+  </div></div>`;
 }
 function optsHtml(){
   return snap.card.opts.map((o,i)=>`
@@ -378,18 +386,20 @@ function answerScreen(){
   if(myIdx===snap.millIdx && !mill.eliminated){
     $( brand(true) + scoreboard() + `
     <div class="panel">
-      <div class="section-label">You are the Millionaire — read the card aloud, then answer honestly &amp; secretly</div>
-      ${cardHtml("You Just Became a Millionaire")}
+      <div class="role-line">You are the Millionaire.</div>
+      <div class="read-aloud">🗣 Read Aloud &nbsp;•&nbsp; Then Choose Secretly</div>
+      ${cardHtml()}
       ${optsHtml()}
-      <button class="btn-gold" ${pendingChoice==null?"disabled":""} onclick="UI.lockAnswer()">Lock In My Secret Answer</button>
+      <button class="btn-gold btn-lock" ${pendingChoice==null?"disabled":""} onclick="UI.lockAnswer()">🔒 Lock In My Secret Answer</button>
       ${bannerHtml()}
     </div>`);
   } else {
     $( brand(true) + scoreboard() + `
     <div class="panel">
-      <div class="section-label">${esc(mill.name)} is the Millionaire</div>
-      ${cardHtml("You Just Became a Millionaire")}
-      <div class="waiting"><p class="muted dots">Listen as they read the card aloud — waiting for their secret answer</p></div>
+      <div class="role-line">${esc(mill.name)} is the Millionaire.</div>
+      <div class="read-aloud">🗣 Listen As The Card Is Read Aloud</div>
+      ${cardHtml()}
+      <div class="waiting"><p class="muted dots">Listen as the Millionaire reads the card aloud — waiting for the secret answer</p></div>
       ${bannerHtml()}
     </div>`);
   }
@@ -407,18 +417,19 @@ function bettingScreen(){
     const chips=[1,2,3].map(v=>`<button class="bet-chip ${pendingBet===v?'sel':''}" ${v>maxB?"disabled":""} onclick="UI.pickBet(${v})">${M(v)}</button>`).join("");
     $( brand(true) + scoreboard() + `
     <div class="panel">
-      <div class="section-label">How did ${esc(mill.name)} answer? Bet on it!</div>
-      ${cardHtml("You Can Bet On It")}
+      <div class="role-line">How did ${esc(mill.name)} answer?</div>
+      <div class="read-aloud">💰 Choose Secretly &nbsp;•&nbsp; Then Place Your Bet</div>
+      ${cardHtml()}
       ${optsHtml()}
       <div class="section-label">Your bet</div>
       <div class="bets">${chips}</div>
-      <button class="btn-gold" ${(pendingChoice==null||pendingBet==null)?"disabled":""} onclick="UI.lockBet()">Lock In My Bet</button>
+      <button class="btn-gold btn-lock" ${(pendingChoice==null||pendingBet==null)?"disabled":""} onclick="UI.lockBet()">🔒 Lock In My Bet</button>
       ${bannerHtml()}
     </div>`);
   } else {
     $( brand(true) + scoreboard() + `
     <div class="panel">
-      ${cardHtml("You Can Bet On It")}
+      ${cardHtml()}
       <div class="waiting"><p class="muted dots">${myIdx===snap.millIdx ? "Your answer is locked — waiting for the bets" : "Bet locked — waiting for the other players"}</p></div>
       <div class="lock-list">${pills}</div>
       ${bannerHtml()}
@@ -602,8 +613,9 @@ window.UI = {
 const gallery = document.getElementById("gallery");
 gallery.innerHTML = `<div class="gallery-intro">
   <h1>Design Review — every screen of the game</h1>
-  <p>Updated with your 7/22 batch: Draft 11 cards, your Directions on Screen 1, shinier and larger logo, tagline removed,
-  Trebuchet MS throughout, darker card quotes. Nothing here is clickable — note further requests by screen number.</p>
+  <p>Updated 7/26 to the recalculated specs: new palette (#081E3B navy, #FFC72C bright gold, #E0B01E border gold,
+  #F7F1E3 cream), larger corner radius, spec widths for the cream panel / answer boxes / lock button.
+  Note further requests by screen number.</p>
 </div>`;
 function shot(num, title, note, setup){
   banner=""; pendingChoice=null; pendingBet=null; quickMode=false;
@@ -623,7 +635,7 @@ const baseSnap = {phase:"lobby", players:P3, millIdx:0, cardIdx:0, totalCards:24
 shot(1, "Introduction page", "your Directions text", ()=>{ role=null; snap=null; myIdx=0; introScreen(); });
 shot(2, "Welcome page", "host or join", ()=>{ role=null; snap=null; myIdx=0; landing(); });
 shot(3, "Lobby — host's view", "room code, player list, quick-game option", ()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap}; render(); });
-shot(4, "The Millionaire's card", "Draft 11 Card 1 (option B selected)", ()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"answer"}; pendingChoice=1; render(); });
+shot(4, "The Millionaire's card", "recalculated specs applied (option B selected)", ()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"answer"}; pendingChoice=1; render(); });
 shot(5, "Waiting for the Millionaire", "what everyone else sees meanwhile", ()=>{ role="client"; myIdx=1; snap={...baseSnap, phase:"answer"}; render(); });
 shot(6, "Betting screen", "guess + bet (option B and $2M selected)", ()=>{ role="client"; myIdx=1; snap={...baseSnap, phase:"betting", answered:true}; pendingChoice=1; pendingBet=2; render(); });
 shot(7, "Waiting for bets", "the Millionaire watches bets lock in", ()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"betting", answered:true, betDone:{1:true}}; render(); });
@@ -632,7 +644,7 @@ shot(8, "The reveal", "answer shown, wins and losses settled", ()=>{ role="host"
     {idx:1, name:"Barbara", choice:1, bet:2, won:true,  balance:21, out:false},
     {idx:2, name:"Pat",     choice:3, bet:3, won:false, balance:15, out:false}
   ]}}; render(); });
-shot(9, "End of game — Grand Prize", "certificate + larger money rain (animated in the real game)", ()=>{ role="host"; myIdx=0; snap={phase:"end",
+shot(9, "End of game — Grand Prize", "certificate + money rain (animated in the real game)", ()=>{ role="host"; myIdx=0; snap={phase:"end",
   players:[
     {name:"Michael", balance:31, eliminated:false, connected:true},
     {name:"Barbara", balance:24, eliminated:false, connected:true},
