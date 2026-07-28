@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>You Just Became a MILLIONAIRE® — Player Feedback</title>
+<style>
+  :root{
+    --navy:#081E3B; --navy-card:#0E2A4F; --cream:#F5EFE2; --cream-panel:#F7F1E3;
+    --gold:#FFC72C; --gold2:#E0B01E; --gold-soft:#EFE3C2; --ink:#0A1A2F;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:#081E3B; min-height:100vh; color:var(--cream);
+    font-family:"Trebuchet MS","Segoe UI",Helvetica,Arial,sans-serif;
+    display:flex; flex-direction:column; align-items:center;}
+  #wrap{width:100%; max-width:560px; padding:16px 16px 50px;}
+  .brand{text-align:center; margin:14px 0 4px;}
+  .brand .script{font-family:"Snell Roundhand","Brush Script MT","Segoe Script",cursive; font-size:1.55rem; color:#f7ecc4;}
+  .brand .title{font-family:Georgia,"Times New Roman",serif; letter-spacing:.12em; font-size:2.3rem; font-weight:400;
+    color:#f5d576;
+    background:linear-gradient(180deg,#FFF3C8 0%,#FFD75E 30%,#FFC72C 55%,#FFF0B0 80%,#E0B01E 100%);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 1px 7px rgba(247,221,138,.4));}
+  .brand .title sup{font-size:.85rem;}
+  .subtitle{text-align:center; color:var(--gold-soft); font-weight:700; margin-top:6px; letter-spacing:.05em;}
+  .intro{text-align:center; color:rgba(236,224,184,.8); font-size:.95rem; margin-top:8px;}
+  .panel{background:rgba(255,255,255,.04); border:1px solid rgba(232,217,160,.25); border-radius:24px; padding:20px 18px 30px; margin-top:16px;}
+  .q{margin-top:22px;}
+  .q .qt{font-weight:700; color:var(--cream); font-size:.98rem; line-height:1.4; margin-bottom:9px;}
+  .q .qt .num{color:var(--gold);}
+  .choices{display:flex; flex-direction:column; gap:6px;}
+  .choices.inline{flex-direction:row; flex-wrap:wrap; gap:6px 16px;}
+  label.choice{display:flex; align-items:center; gap:9px; font-size:.93rem; color:rgba(245,239,226,.9); cursor:pointer; padding:3px 2px;}
+  input[type=radio]{accent-color:var(--gold); width:17px; height:17px; flex:none;}
+  .sub{margin-top:10px;}
+  .sub .sl{font-size:.9rem; color:var(--gold-soft); margin-bottom:5px;}
+  textarea, input[type=text]{width:100%; background:rgba(255,255,255,.07); border:1px solid rgba(232,217,160,.35);
+    border-radius:10px; color:var(--cream); font-family:inherit; font-size:.95rem; padding:10px 12px; outline:none;}
+  textarea:focus, input[type=text]:focus{border-color:var(--gold);}
+  textarea{min-height:70px; resize:vertical;}
+  .btn{display:block; width:87%; margin:28px auto 0; background:linear-gradient(180deg,#FFD75E,#EFB80D); color:#231a00;
+    border:none; border-radius:10px; font-size:1.05rem; font-weight:700; font-family:inherit; padding:14px 20px; cursor:pointer;
+    text-transform:uppercase; letter-spacing:.06em;}
+  .btn:active{transform:scale(.98);}
+  .btn:disabled{opacity:.5;}
+  #thanks{display:none; text-align:center; padding:40px 10px;}
+  #thanks .big{font-size:1.5rem; color:var(--gold); font-weight:700; margin-bottom:10px;}
+  #err{display:none; text-align:center; color:#ff8a8a; margin-top:14px; font-size:.9rem;}
+  footer{font-size:.7rem; color:rgba(236,224,184,.45); text-align:center; padding:12px;}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div class="brand">
+    <div class="script">You Just Became a</div>
+    <div class="title">MILLIONAIRE<sup>®</sup></div>
+  </div>
+  <div class="subtitle">Quick Player Feedback</div>
+  <p class="intro">Thanks for sharing your opinion! This should take about 2–3 minutes.</p>
+
+  <form id="evalform" class="panel" action="https://formspree.io/f/xdaqbjlo" method="POST">
+
+    <div class="q"><div class="qt"><span class="num">1.</span> Overall, how much fun was the game?</div>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="1. Overall fun" value="A lot of fun">A lot of fun</label>
+        <label class="choice"><input type="radio" name="1. Overall fun" value="Fun">Fun</label>
+        <label class="choice"><input type="radio" name="1. Overall fun" value="Somewhat fun">Somewhat fun</label>
+        <label class="choice"><input type="radio" name="1. Overall fun" value="Not very fun">Not very fun</label>
+        <label class="choice"><input type="radio" name="1. Overall fun" value="Not fun">Not fun</label>
+      </div></div>
+
+    <div class="q"><div class="qt"><span class="num">2.</span> Did the game lead to enjoyable conversation among the players?</div>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="2. Enjoyable conversation" value="A lot">A lot</label>
+        <label class="choice"><input type="radio" name="2. Enjoyable conversation" value="Quite a bit">Quite a bit</label>
+        <label class="choice"><input type="radio" name="2. Enjoyable conversation" value="Some">Some</label>
+        <label class="choice"><input type="radio" name="2. Enjoyable conversation" value="Very little">Very little</label>
+        <label class="choice"><input type="radio" name="2. Enjoyable conversation" value="Not at all">Not at all</label>
+      </div></div>
+
+    <div class="q"><div class="qt"><span class="num">3.</span> Did you learn anything surprising or interesting about other players?</div>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="3. Learned about players" value="Yes, definitely">Yes, definitely</label>
+        <label class="choice"><input type="radio" name="3. Learned about players" value="A little">A little</label>
+        <label class="choice"><input type="radio" name="3. Learned about players" value="Not really">Not really</label>
+      </div></div>
+
+    <div class="q"><div class="qt"><span class="num">4.</span> How easy was it to understand how to play?</div>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="4. Ease of understanding" value="Very easy">Very easy</label>
+        <label class="choice"><input type="radio" name="4. Ease of understanding" value="Easy">Easy</label>
+        <label class="choice"><input type="radio" name="4. Ease of understanding" value="Somewhat confusing">Somewhat confusing</label>
+        <label class="choice"><input type="radio" name="4. Ease of understanding" value="Very confusing">Very confusing</label>
+      </div></div>
+
+    <div class="q"><div class="qt"><span class="num">5.</span> Were you ever unsure what you were supposed to do next?</div>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="5. Unsure what to do" value="Never">Never</label>
+        <label class="choice"><input type="radio" name="5. Unsure what to do" value="Once or twice">Once or twice</label>
+        <label class="choice"><input type="radio" name="5. Unsure what to do" value="Several times">Several times</label>
+        <label class="choice"><input type="radio" name="5. Unsure what to do" value="Often">Often</label>
+      </div></div>
+
+    <div class="q"><div class="qt"><span class="num">6.</span> About how long did your game take?</div>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="6. Game duration" value="Under 20 minutes">Under 20 minutes</label>
+        <label class="choice"><input type="radio" name="6. Game duration" value="20–30 minutes">20–30 minutes</label>
+        <label class="choice"><input type="radio" name="6. Game duration" value="30–45 minutes">30–45 minutes</label>
+        <label class="choice"><input type="radio" name="6. Game duration" value="45–60 minutes">45–60 minutes</label>
+        <label class="choice"><input type="radio" name="6. Game duration" value="Over an hour">Over an hour</label>
+      </div>
+      <div class="sub"><div class="sl">And how did that length feel?</div>
+        <div class="choices inline">
+          <label class="choice"><input type="radio" name="6b. Length felt" value="Too short">Too short</label>
+          <label class="choice"><input type="radio" name="6b. Length felt" value="About right">About right</label>
+          <label class="choice"><input type="radio" name="6b. Length felt" value="Too long">Too long</label>
+        </div></div>
+    </div>
+
+    <div class="q"><div class="qt"><span class="num">7.</span> What did you think of the cards overall?</div>
+      <div class="sub"><div class="sl">Fun / entertaining</div>
+        <div class="choices inline">
+          <label class="choice"><input type="radio" name="7a. Cards - fun" value="Excellent">Excellent</label>
+          <label class="choice"><input type="radio" name="7a. Cards - fun" value="Good">Good</label>
+          <label class="choice"><input type="radio" name="7a. Cards - fun" value="Fair">Fair</label>
+          <label class="choice"><input type="radio" name="7a. Cards - fun" value="Poor">Poor</label>
+        </div></div>
+      <div class="sub"><div class="sl">Interesting to talk about</div>
+        <div class="choices inline">
+          <label class="choice"><input type="radio" name="7b. Cards - interesting" value="Excellent">Excellent</label>
+          <label class="choice"><input type="radio" name="7b. Cards - interesting" value="Good">Good</label>
+          <label class="choice"><input type="radio" name="7b. Cards - interesting" value="Fair">Fair</label>
+          <label class="choice"><input type="radio" name="7b. Cards - interesting" value="Poor">Poor</label>
+        </div></div>
+      <div class="sub"><div class="sl">Easy to understand</div>
+        <div class="choices inline">
+          <label class="choice"><input type="radio" name="7c. Cards - clarity" value="Excellent">Excellent</label>
+          <label class="choice"><input type="radio" name="7c. Cards - clarity" value="Good">Good</label>
+          <label class="choice"><input type="radio" name="7c. Cards - clarity" value="Fair">Fair</label>
+          <label class="choice"><input type="radio" name="7c. Cards - clarity" value="Poor">Poor</label>
+        </div></div>
+      <div class="sub"><div class="sl">Variety of questions</div>
+        <div class="choices inline">
+          <label class="choice"><input type="radio" name="7d. Cards - variety" value="Excellent">Excellent</label>
+          <label class="choice"><input type="radio" name="7d. Cards - variety" value="Good">Good</label>
+          <label class="choice"><input type="radio" name="7d. Cards - variety" value="Fair">Fair</label>
+          <label class="choice"><input type="radio" name="7d. Cards - variety" value="Poor">Poor</label>
+        </div></div>
+    </div>
+
+    <div class="q"><div class="qt"><span class="num">8.</span> Did you experience any technical or display problems?</div>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="8. Technical problems" value="No">No</label>
+        <label class="choice"><input type="radio" name="8. Technical problems" value="Yes, minor">Yes, minor</label>
+        <label class="choice"><input type="radio" name="8. Technical problems" value="Yes, significant">Yes, significant</label>
+      </div>
+      <div class="sub"><div class="sl">If yes, what happened?</div>
+        <textarea name="8b. Problem details" rows="2"></textarea></div>
+    </div>
+
+    <div class="q"><div class="qt"><span class="num">9.</span> What did you play on?</div>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="9. Device" value="iPhone">iPhone</label>
+        <label class="choice"><input type="radio" name="9. Device" value="Android phone">Android phone</label>
+        <label class="choice"><input type="radio" name="9. Device" value="iPad">iPad</label>
+        <label class="choice"><input type="radio" name="9. Device" value="Other tablet">Other tablet</label>
+        <label class="choice"><input type="radio" name="9. Device" value="Computer">Computer</label>
+      </div>
+      <div class="sub"><div class="sl">Browser</div>
+        <div class="choices inline">
+          <label class="choice"><input type="radio" name="9b. Browser" value="Safari">Safari</label>
+          <label class="choice"><input type="radio" name="9b. Browser" value="Chrome">Chrome</label>
+          <label class="choice"><input type="radio" name="9b. Browser" value="Firefox">Firefox</label>
+          <label class="choice"><input type="radio" name="9b. Browser" value="Other/Not sure">Other / Not sure</label>
+        </div></div>
+    </div>
+
+    <div class="q"><div class="qt"><span class="num">10.</span> Would you like to play again?</div>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="10. Play again" value="Definitely">Definitely</label>
+        <label class="choice"><input type="radio" name="10. Play again" value="Probably">Probably</label>
+        <label class="choice"><input type="radio" name="10. Play again" value="Maybe">Maybe</label>
+        <label class="choice"><input type="radio" name="10. Play again" value="Probably not">Probably not</label>
+        <label class="choice"><input type="radio" name="10. Play again" value="Definitely not">Definitely not</label>
+      </div></div>
+
+    <div class="q"><div class="qt"><span class="num">11.</span> Would you recommend the game to friends or family?</div>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="11. Recommend" value="Definitely">Definitely</label>
+        <label class="choice"><input type="radio" name="11. Recommend" value="Probably">Probably</label>
+        <label class="choice"><input type="radio" name="11. Recommend" value="Maybe">Maybe</label>
+        <label class="choice"><input type="radio" name="11. Recommend" value="Probably not">Probably not</label>
+        <label class="choice"><input type="radio" name="11. Recommend" value="Definitely not">Definitely not</label>
+      </div></div>
+
+    <div class="q"><div class="qt"><span class="num">12.</span> What did you like BEST about the game?</div>
+      <textarea name="12. Liked best"></textarea></div>
+
+    <div class="q"><div class="qt"><span class="num">13.</span> If you could change ONE thing about the game, what would it be?</div>
+      <textarea name="13. Change one thing"></textarea></div>
+
+    <div class="q"><div class="qt"><span class="num">14.</span> Any card you especially liked, disliked, or would change?</div>
+      <textarea name="14. Card comments"></textarea></div>
+
+    <button type="submit" class="btn" id="sendbtn">Send My Feedback</button>
+    <div id="err">Something went wrong sending your feedback. Please check your internet connection and try again.</div>
+  </form>
+
+  <div id="thanks" class="panel">
+    <div class="big">🏆 Thank you!</div>
+    <p style="color:rgba(236,224,184,.85)">Your feedback will help us make the game better.<br>— Time for Two</p>
+  </div>
+</div>
+<footer>You Just Became a MILLIONAIRE® &nbsp;•&nbsp; © Time for Two, Inc. 1991, 2016, 2023, 2026</footer>
+
+<script>
+document.getElementById("evalform").addEventListener("submit", async function(e){
+  e.preventDefault();
+  const form = e.target, btn = document.getElementById("sendbtn"), err = document.getElementById("err");
+  btn.disabled = true; btn.textContent = "Sending…"; err.style.display="none";
+  try{
+    const resp = await fetch(form.action, {method:"POST", body:new FormData(form), headers:{Accept:"application/json"}});
+    if(resp.ok){
+      form.style.display = "none";
+      document.getElementById("thanks").style.display = "block";
+      window.scrollTo(0,0);
+    } else { throw new Error("bad status"); }
+  }catch(ex){
+    err.style.display = "block";
+    btn.disabled = false; btn.textContent = "Send My Feedback";
+  }
+});
+</script>
+</body>
+</html>
