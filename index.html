@@ -112,12 +112,12 @@
 const CARDS = [
  {quote:"I literally danced around the living room shouting, ‘I’m rich!’", by:"Anonymous lottery winner", q:"When I realized I was a millionaire, the first thing I did was...", opts:["Jump up and down, barely making sense", "Completely freeze — or possibly faint", "Sit calmly, thinking, “Well, that’s cool.”", "Run out the door shouting, “Let the buying begin!”"]},
  {quote:"I don’t know much about being a millionaire, but I’ll bet I’d be darling at it.", by:"Dorothy Parker", q:"How confident are you that you’d pull off being a millionaire?", opts:["Completely — I’d make it look effortless", "I’d need a rehearsal period to get used to all that attention", "I’d keep waiting for someone to tell me there’d been a mistake", "I’d absolutely pull it off — right until taxes and chaos kicked in"]},
- {quote:"I’ve been rich, and I’ve been poor. Rich is better.", by:"Beatrice Kaufman", q:"To really feel wealthy, I will...", opts:["Announce in a crowded restaurant, “Food and drinks for everyone!”", "Hire a style consultant to upgrade my wardrobe", "Keep a full-time masseuse on staff", "Have exotic international foods flown in"]},
+ {quote:"I’ve been rich, and I’ve been poor. Rich is better.", by:"Beatrice Kaufman", q:"To really feel wealthy, I will...", opts:["Announce in a crowded restaurant, “Food and drinks on me!”", "Charter a private jet for a spontaneous getaway", "Keep a full-time masseuse on staff", "Have exotic international foods flown in"]},
  {quote:"The power of money is the power of choice.", by:"Proverb", q:"The freedom I will enjoy the most is...", opts:["Never working again", "Traveling anytime, anywhere", "Buying whatever I want", "Saying no to things I don’t want to do"]},
  {quote:"The millionaire next door may still be clipping coupons.", by:"Thomas J. Stanley", q:"Even as a millionaire, I will probably still...", opts:["Recalculate the tip in my head, just to be sure", "Open three apps to see who has the better deal", "Say “I can’t afford that” out of habit", "Hoard reward points like treasure"]},
  {quote:"Life isn’t meant to just be lived — it should be celebrated.", by:"Osho", q:"No more paper plates and balloons for my birthday. This year I’m going to...", opts:["Throw a dart at a map and travel to wherever it lands", "Rent out an entire theme park for my friends", "Hire a photographer and glam squad — every angle says “ageless”", "Walk in my ancestors’ footsteps — a heritage trip without the hard parts"]},
  {quote:"Real generosity comes with no strings attached and no expectations.", by:"Suze Orman", q:"When someone close to me is struggling financially, I will...", opts:["Anonymously pay their bills", "Offer a no-strings-attached loan", "Give financial advice instead", "Avoid getting involved"]},
- {quote:"Money may not buy happiness, but it sure buys better service.", by:"Will Rogers", q:"The one thing I’ll now do to receive better treatment is...", opts:["Casually flash my premium credit card or app", "Arrive in my luxury car where everyone can see it", "Give generous holiday gifts", "Generously tip people in advance"]},
+ {quote:"Money may not buy happiness, but it sure buys better service.", by:"Will Rogers", q:"The one thing I’ll now do to receive better treatment is...", opts:["Casually flash my premium credit card or app", "Make friends with the people who can make things happen", "Send lavish gifts during the holidays", "Slip them a tip right up front"]},
  {quote:"Formula for success: Rise early, work hard, strike oil.", by:"J. Paul Getty", q:"Even though I didn’t earn my riches, I believe that the young people in my family should work for their spending money.", opts:["Agree", "Disagree"]},
  {quote:"The purpose of life is to live it, to taste experience to the utmost.", by:"Eleanor Roosevelt", q:"If my life became a highlight reel, what moments would I chase most?", opts:["Front-row or VIP moments — premieres and backstage experiences", "Once-in-a-lifetime nature moments — Northern Lights and safari migrations", "Deep personal moments — reunions and multi-generation vacations", "“I can’t believe we did that” — spontaneous last-minute flights and surprise parties"]},
  {quote:"It’s really hard to be roommates with people if your suitcases are much better than theirs.", by:"J. D. Salinger", q:"So that my family and friends will not be jealous, I’m most likely to...", opts:["Cut the labels out of my designer clothes", "Claim I won my Lamborghini in a raffle", "Tell them my jewels are costume (even if they aren’t)", "Introduce my new staff as friends helping with my projects"]},
@@ -463,19 +463,22 @@ function endScreen(){
   const drops = [5,15,26,37,48,59,70,81,92,33,64,10].map((x,i)=>
     `<span class="drop" style="left:${x}%; animation-delay:${(i*0.7).toFixed(1)}s; animation-duration:${4+(i%5)}s">${i%3===0?"💰":"💵"}</span>`).join("");
   $( brand(false) + `
-  <div class="panel winner-box">
-    <div class="rain">${drops}</div>
-    <div class="trophy">🏆</div>
-    <p class="muted">${snap.winners.length>1?'Winners':'Winner'}</p>
-    <div class="prize-cert">
-      <div class="pc-head">★ Grand Prize ★</div>
-      <div class="pc-title">The Millionaire's Cup</div>
-      <div class="pc-sub">awarded to</div>
-      <div class="pc-name">${names}</div>
-      <div class="pc-sub">Certified Multi-Millionaire — final fortune of ${M(top)}</div>
+  <div class="panel">
+    <div class="winner-box">
+      <div class="rain">${drops}</div>
+      <div class="trophy">🏆</div>
+      <p class="muted">${snap.winners.length>1?'Winners':'Winner'}</p>
+      <div class="prize-cert">
+        <div class="pc-head">★ Grand Prize ★</div>
+        <div class="pc-title">The Millionaire's Cup</div>
+        <div class="pc-sub">awarded to</div>
+        <div class="pc-name">${names}</div>
+        <div class="pc-sub">Certified Multi-Millionaire — final fortune of ${M(top)}</div>
+      </div>
     </div>
     <div style="margin-top:16px; text-align:left">${stand}</div>
-    ${role==="host" ? `<button class="btn-gold" onclick="UI.playAgain()">Play Again (same players)</button>` : ""}
+    <p class="muted" style="margin-top:18px; text-align:center;">Thank you for playing our prototype game. Please help us make it even better by filling out this brief Evaluation Form.</p>
+    <button class="btn-gold" onclick="location.href='yjbam-evaluation.html'">Evaluation Form →</button>
     <button class="btn-ghost" onclick="location.reload()">Leave Game</button>
   </div>`);
 }
