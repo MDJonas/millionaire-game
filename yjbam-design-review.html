@@ -114,44 +114,46 @@
 
 <script id="game-logic">
 /* ============ PURE GAME LOGIC + HOST STATE MACHINE (no DOM) ============ */
-/* Draft 11 deck (7/22/2026) — fixed play order (Michael & Barbara approved).
-   Last two cards are the designed closers and are always played. */
+/* Current deck (7/31/2026) — 29 cards. Cards 1–20 are the prototype game;
+   Card 20 (Mae West) is pinned as the closer so every game ends on it.
+   Cards 21–29 stay in the deck but are not reached at 3–4 players. */
 const CARDS = [
- {quote:"I literally danced around the living room shouting, ‘I’m rich!’", by:"Anonymous lottery winner", q:"When I realized I was a millionaire, the first thing I did was...", opts:["Jump up and down, barely making sense", "Completely freeze — or possibly faint", "Sit calmly, thinking, “Well, that’s cool.”", "Run out the door shouting, “Let the buying begin!”"]},
- {quote:"I don’t know much about being a millionaire, but I’ll bet I’d be darling at it.", by:"Dorothy Parker", q:"How confident are you that you’d pull off being a millionaire?", opts:["Completely — I’d make it look effortless", "I’d need a rehearsal period to get used to all that attention", "I’d keep waiting for someone to tell me there’d been a mistake", "I’d absolutely pull it off — right until taxes and chaos kicked in"]},
- {quote:"I’ve been rich, and I’ve been poor. Rich is better.", by:"Beatrice Kaufman", q:"To really feel wealthy, I will...", opts:["Announce in a crowded restaurant, “Food and drinks on me!”", "Charter a private jet for a spontaneous getaway", "Keep a full-time masseuse on staff", "Have exotic international foods flown in"]},
- {quote:"The power of money is the power of choice.", by:"Proverb", q:"The freedom I will enjoy the most is...", opts:["Never working again", "Traveling anytime, anywhere", "Buying whatever I want", "Saying no to things I don’t want to do"]},
- {quote:"The millionaire next door may still be clipping coupons.", by:"Thomas J. Stanley", q:"Even as a millionaire, I will probably still...", opts:["Recalculate the tip in my head, just to be sure", "Open three apps to see who has the better deal", "Say “I can’t afford that” out of habit", "Hoard reward points like treasure"]},
- {quote:"Life isn’t meant to just be lived — it should be celebrated.", by:"Osho", q:"No more paper plates and balloons for my birthday. This year I’m going to...", opts:["Throw a dart at a map and travel to wherever it lands", "Rent out an entire theme park for my friends", "Hire a photographer and glam squad — every angle says “ageless”", "Walk in my ancestors’ footsteps — a heritage trip without the hard parts"]},
- {quote:"Real generosity comes with no strings attached and no expectations.", by:"Suze Orman", q:"When someone close to me is struggling financially, I will...", opts:["Anonymously pay their bills", "Offer a no-strings-attached loan", "Give financial advice instead", "Avoid getting involved"]},
- {quote:"Money may not buy happiness, but it sure buys better service.", by:"Will Rogers", q:"The one thing I’ll now do to receive better treatment is...", opts:["Casually flash my premium credit card or app", "Make friends with the people who can make things happen", "Send lavish gifts during the holidays", "Slip them a tip right up front"]},
- {quote:"Formula for success: Rise early, work hard, strike oil.", by:"J. Paul Getty", q:"Even though I didn’t earn my riches, I believe that the young people in my family should work for their spending money.", opts:["Agree", "Disagree"]},
- {quote:"The purpose of life is to live it, to taste experience to the utmost.", by:"Eleanor Roosevelt", q:"If my life became a highlight reel, what moments would I chase most?", opts:["Front-row or VIP moments — premieres and backstage experiences", "Once-in-a-lifetime nature moments — Northern Lights and safari migrations", "Deep personal moments — reunions and multi-generation vacations", "“I can’t believe we did that” — spontaneous last-minute flights and surprise parties"]},
- {quote:"It’s really hard to be roommates with people if your suitcases are much better than theirs.", by:"J. D. Salinger", q:"So that my family and friends will not be jealous, I’m most likely to...", opts:["Cut the labels out of my designer clothes", "Claim I won my Lamborghini in a raffle", "Tell them my jewels are costume (even if they aren’t)", "Introduce my new staff as friends helping with my projects"]},
- {quote:"Money... you thought of nothing else if you didn’t have it, and thought of other things if you did.", by:"James Baldwin", q:"Now that the bills are paid, the other things I’ll focus on are...", opts:["Support causes making the world a better place", "Having new adventures I used to call too expensive", "Learning, growing and challenging myself", "Savoring the good life — just because I can"]},
- {quote:"Never invest in anything that eats or needs repairing.", by:"Billy Rose", q:"My first investment will probably be in...", opts:["Diamonds, rubies and emeralds — especially since they look great on me", "Real estate — a beach house here, a ski cabin there", "The stock market — only in “blue chips”", "Cryptocurrency — high risk, high return"]},
- {quote:"Good health is the real wealth.", by:"Mahatma Gandhi", q:"To ensure I stay healthy to fully enjoy my new wealth, I will invest both my time and money in...", opts:["A trainer, a nutritionist, and someone to make me actually show up", "VIP doctors and tests I didn’t know existed", "Spa retreats that somehow count as “health investments”", "A cryogenic backup plan — just in case"]},
- {quote:"It is not what you know, but who you know.", by:"Harold Geneen", q:"It’s 1 p.m. and I’m lunching at an exclusive spot with my favorite celebrity, who is a...", opts:["Oscar-winning actor", "Well-known sports figure", "World leader", "Tech founder"]},
- {quote:"Giving is not just about making a donation. It is about making a difference.", by:"Kathy Calvin", q:"My charitable giving will focus mostly on...", opts:["Causes that have personally touched my life", "High-profile global charities", "Local grassroots community projects", "Tax-exempt foundations"]},
- {quote:"Why cook when you can be cooked for?", by:"Bette Midler", q:"My relationship with food will now include...", opts:["A private chef", "Daily restaurant dining", "Gourmet meal delivery", "Cooking as a hobby"]},
- {quote:"Some people love to haggle. I’d rather have the keys.", by:"Michael David", q:"My dream car is sitting in the showroom. If I negotiated, the price would be much lower. But why hassle? I’ll just pay the list price and drive away.", opts:["Agree", "Disagree"]},
- {quote:"I’m not anti-social. I’m just not user-friendly.", by:"Bill Murray", q:"In order to maintain my privacy, the one thing I am most likely to do is...", opts:["Wear big dark sunglasses", "Change my name", "Build iron gates around my house", "Move to a town where no one knows me"]},
- {quote:"The price of anything is the amount of life you exchange for it.", by:"Henry David Thoreau", q:"Now that I’m a millionaire, the biggest change I’ll make in how I spend my time is...", opts:["Guard my time — only say yes to what excites me", "Buy back my time — hello cleaners, assistants, and takeout", "Slow down — leave more space for unplanned days", "Show up more — prioritize time with family and friends"]},
- {quote:"I’m not going to buy my kids an encyclopedia. Let them walk to school like I did.", by:"Yogi Berra", q:"The “character-building” hardship I’d be most likely to impose on my kids is...", opts:["Make them use a paper map instead of GPS", "Refuse to give them the Wi-Fi password until chores are done", "Make them use a phone to order pizza instead of using an app", "Make them fly Economy while I fly First Class"]},
- {quote:"I like my money where I can see it: hanging in my closet.", by:"Carrie Bradshaw", q:"An indulgence I will never feel guilty about is...", opts:["A dream car that makes me smile when I drive", "Building the ultimate home entertainment space", "Having a personal assistant who manages my digital life", "Custom tailoring everything for the perfect fit"]},
- {quote:"The greatest threat to our planet is the belief that someone else will save it.", by:"Robert Swan", q:"“There’s a global energy crisis, and prices have skyrocketed...” I will...", opts:["Drive my luxury SUVs and just pay more", "Drive less", "Switch to electric/hybrid vehicles", "Invest in energy companies — the time is right"]},
- {quote:"All our dreams can come true, if we have the courage to pursue them.", by:"Walt Disney", q:"The wildest thing I will seriously consider doing is...", opts:["Running for political office", "Funding a movie about my life", "Buying a castle", "Creating a private festival"]},
- {quote:"The sweetest gifts are the ones that don’t check who’s watching.", by:"Anonymous", q:"I donated a huge sum to a charity gala. Would I be offended if I didn’t get tagged in any posts or stories?", opts:["Definitely mind — I want recognition", "Prefer to stay anonymous — the giving is enough", "I’d only want recognition if it helps the cause", "I’d pretend not to care, but be secretly a little disappointed"]},
- {quote:"Money can’t buy happiness, but it can make you awfully comfortable while you’re being miserable.", by:"Clare Boothe Luce", q:"The thing money would change most about my daily life is...", opts:["My stress level — fewer things to worry about", "My choices — more freedom to do what I want", "My generosity — more ability to help others", "My confidence — feeling like new doors are open"]},
- {quote:"Character is doing the right thing when nobody’s looking.", by:"J. C. Watts", q:"If money opened doors that aren’t open to everyone, I’d...", opts:["Go through them — that’s a millionaire’s perk", "Go through, but make sure nobody gets pushed to the back", "Stay in line — I’d rather keep it fair", "Go through, then figure out how to bring others along"]},
- {quote:"The best things in life are free. The second best are very expensive.", by:"Coco Chanel", q:"The most annoying “hidden cost” of my new lifestyle will be...", opts:["Privacy — I miss being able to walk around unnoticed", "Staff — everything I own needs someone to manage it", "Taxes — the government is also celebrating my success", "Stress — finding out that “money” brings different problems"]},
- {quote:"You only live once, but if you do it right, once is enough.", by:"Mae West", q:"The most underrated luxury will be...", opts:["A morning without alarms", "A personal assistant or driver", "Sleeping without money worries", "Time completely to myself"]},
- {quote:"Not all treasure is silver and gold.", by:"J. R. R. Tolkien", q:"The trait that will become my “treasure” is my...", opts:["Generosity", "Ambition", "Love of the finer things", "Empathy"]}
+ {"quote": "I literally danced around the living room shouting, ‘I’m rich!’", "by": "Anonymous lottery winner", "q": "When I realized I was a millionaire, the first thing I did was...", "opts": ["Jump up and down, barely making sense", "Completely freeze — or possibly faint", "Sit calmly, thinking, “Well, that’s cool.”", "Run out the door shouting, “Let the buying begin!”"]},
+ {"quote": "I don’t know much about being a millionaire, but I’ll bet I’d be darling at it.", "by": "Dorothy Parker", "q": "How confident are you that you’d pull off being a millionaire?", "opts": ["Completely — I’d make it look effortless", "I’d need a rehearsal period to get used to all that attention", "I’d keep waiting for someone to tell me there’d been a mistake", "I’d absolutely pull it off — right until taxes and chaos kicked in"]},
+ {"quote": "I’ve been rich, and I’ve been poor. Rich is better.", "by": "Beatrice Kaufman", "q": "To really feel wealthy, I will...", "opts": ["Announce in a crowded restaurant, “Food and drinks on me!”", "Charter a private jet for a spontaneous getaway", "Keep a full-time masseuse on staff", "Have exotic international foods flown in"]},
+ {"quote": "The millionaire next door may still be clipping coupons.", "by": "Thomas J. Stanley", "q": "Even as a millionaire, I will probably still...", "opts": ["Recalculate the tip in my head, just to be sure", "Open three apps to see who has the better deal", "Say “I can’t afford that” out of habit", "Hoard reward points like treasure"]},
+ {"quote": "Money may not buy happiness, but it sure buys better service.", "by": "Will Rogers", "q": "The one thing I’ll now do to receive better treatment is...", "opts": ["Casually flash my premium credit card or app", "Remember names — especially the useful ones", "Spend lavishly on holiday gifts", "Slip them a tip right up front"]},
+ {"quote": "Life isn’t meant to just be lived — it should be celebrated.", "by": "Osho", "q": "No more paper plates and balloons for my birthday. This year I’m going to...", "opts": ["Throw a dart at a map and travel to wherever it lands", "Rent out an entire theme park for my friends", "Hire a photographer and glam squad — every angle says “ageless”", "Walk in my ancestors’ footsteps — a heritage trip without the hard parts"]},
+ {"quote": "Real generosity comes with no strings attached and no expectations.", "by": "Suze Orman", "q": "When someone close to me is struggling financially, I will...", "opts": ["Anonymously pay their bills", "Offer a no-strings-attached loan", "Give financial advice instead", "Avoid getting involved"]},
+ {"quote": "It’s really hard to be roommates with people if your suitcases are much better than theirs.", "by": "J. D. Salinger", "q": "So that my family and friends will not be jealous, I’m most likely to...", "opts": ["Cut the labels out of my designer clothes", "Claim I won my Lamborghini in a raffle", "Tell them my jewels are costume (even if they aren’t)", "Introduce my new staff as friends helping with my projects"]},
+ {"quote": "Formula for success: Rise early, work hard, strike oil.", "by": "J. Paul Getty", "q": "If I were going to strike it rich today, I’d get involved with:", "opts": ["Bitcoins — because nothing says stability like a 40% swing in asset value", "AI companies — because if robots take over, I’d want to be a shareholder", "Prediction markets — because it turns “I told you so” into income", "High-risk, high-return stocks — because who needs to sleep through the night?"]},
+ {"quote": "It is not what you know, but who you know.", "by": "Harold Geneen", "q": "It’s 1 p.m. and I’m lunching at an exclusive spot with my favorite celebrity, who is a...", "opts": ["Oscar-winning actor", "Well-known sports figure", "World leader", "Tech founder"]},
+ {"quote": "Some people love to haggle. I’d rather have the keys.", "by": "Michael David", "q": "My dream car is sitting in the showroom. If I negotiated, the price would be much lower. But why hassle? I’ll just pay the list price and drive away.", "opts": ["Agree", "Disagree"]},
+ {"quote": "I’m not anti-social. I’m just not user-friendly.", "by": "Bill Murray", "q": "In order to maintain my privacy, the one thing I am most likely to do is...", "opts": ["Wear big dark sunglasses", "Change my name", "Build iron gates around my house", "Move to a town where no one knows me"]},
+ {"quote": "Good health is the real wealth.", "by": "Mahatma Gandhi", "q": "To ensure I stay healthy to fully enjoy my new wealth, I will invest both my time and money in...", "opts": ["A trainer, a nutritionist, and someone to make me actually show up", "VIP doctors and tests I didn’t know existed", "Spa retreats that somehow count as “health investments”", "A cryogenic backup plan — just in case"]},
+ {"quote": "Why cook when you can be cooked for?", "by": "Bette Midler", "q": "My relationship with food will now include...", "opts": ["A private chef", "Daily restaurant dining", "Gourmet meal delivery", "Cooking as a hobby"]},
+ {"quote": "I’m not going to buy my kids an encyclopedia. Let them walk to school like I did.", "by": "Yogi Berra", "q": "The “character-building” hardship I’d be most likely to impose on my kids is...", "opts": ["Make them use a paper map instead of GPS", "Refuse to give them the Wi-Fi password until chores are done", "Make them use a phone to order pizza instead of using an app", "Make them fly Economy while I fly First Class"]},
+ {"quote": "I like my money where I can see it: hanging in my closet.", "by": "Carrie Bradshaw", "q": "An indulgence I will never feel guilty about is...", "opts": ["A dream car that makes me smile when I drive", "Building the ultimate home entertainment space", "Having a personal assistant who manages my digital life", "Custom tailoring everything for the perfect fit"]},
+ {"quote": "The sweetest gifts are the ones that don’t check who’s watching.", "by": "Anonymous", "q": "I donated a huge sum to a charity gala. Would I be offended if I didn’t get tagged in any posts or stories?", "opts": ["Definitely mind — I want recognition", "Prefer to stay anonymous — the giving is enough", "I’d only want recognition if it helps the cause", "I’d pretend not to care, but be secretly a little disappointed"]},
+ {"quote": "All our dreams can come true, if we have the courage to pursue them.", "by": "Walt Disney", "q": "The wildest thing I will seriously consider doing is...", "opts": ["Running for political office", "Funding a movie about my life", "Buying a castle", "Creating a private festival"]},
+ {"quote": "The best things in life are free. The second best are very expensive.", "by": "Coco Chanel", "q": "The most annoying “hidden cost” of my new lifestyle will be...", "opts": ["Privacy — I miss being able to walk around unnoticed", "Staff — everything I own needs someone to manage it", "Taxes — the government is also celebrating my success", "Stress — finding out that “money” brings different problems"]},
+ {"quote": "You only live once, but if you do it right, once is enough.", "by": "Mae West", "q": "The most underrated luxury will be...", "opts": ["A morning without alarms", "A personal assistant or driver", "Sleeping without money worries", "Time completely to myself"]},
+ {"quote": "The power of money is the power of choice.", "by": "Proverb", "q": "The freedom I will enjoy the most is...", "opts": ["Never working again", "Traveling anytime, anywhere", "Buying whatever I want", "Saying no to things I don’t want to do"]},
+ {"quote": "The purpose of life is to live it, to taste experience to the utmost.", "by": "Eleanor Roosevelt", "q": "If my life became a highlight reel, what moments would I chase most?", "opts": ["Front-row or VIP moments — premieres and backstage experiences", "Once-in-a-lifetime nature moments — Northern Lights and safari migrations", "Deep personal moments — reunions and multi-generation vacations", "“I can’t believe we did that” — spontaneous last-minute flights and surprise parties"]},
+ {"quote": "Money... you thought of nothing else if you didn’t have it, and thought of other things if you did.", "by": "James Baldwin", "q": "Now that the bills are paid, the other things I’ll focus on are...", "opts": ["Support causes making the world a better place", "Having new adventures I used to call too expensive", "Learning, growing and challenging myself", "Savoring the good life — just because I can"]},
+ {"quote": "Never invest in anything that eats or needs repairing.", "by": "Billy Rose", "q": "My first investment will probably be in...", "opts": ["Diamonds, rubies and emeralds — especially since they look great on me", "Real estate — a beach house here, a ski cabin there", "The stock market — only in “blue chips”", "Cryptocurrency — high risk, high return"]},
+ {"quote": "Giving is not just about making a donation. It is about making a difference.", "by": "Kathy Calvin", "q": "My charitable giving will focus mostly on...", "opts": ["Causes that have personally touched my life", "High-profile global charities", "Local grassroots community projects", "Tax-exempt foundations"]},
+ {"quote": "The price of anything is the amount of life you exchange for it.", "by": "Henry David Thoreau", "q": "Now that I’m a millionaire, the biggest change I’ll make in how I spend my time is...", "opts": ["Guard my time — only say yes to what excites me", "Buy back my time — hello cleaners, assistants, and takeout", "Slow down — leave more space for unplanned days", "Show up more — prioritize time with family and friends"]},
+ {"quote": "The greatest threat to our planet is the belief that someone else will save it.", "by": "Robert Swan", "q": "“There’s a global energy crisis, and prices have skyrocketed...” I will...", "opts": ["Drive my luxury SUVs and just pay more", "Drive less", "Switch to electric/hybrid vehicles", "Invest in energy companies — the time is right"]},
+ {"quote": "Money can’t buy happiness, but it can make you awfully comfortable while you’re being miserable.", "by": "Clare Boothe Luce", "q": "The thing money would change most about my daily life is...", "opts": ["My stress level — fewer things to worry about", "My choices — more freedom to do what I want", "My generosity — more ability to help others", "My confidence — feeling like new doors are open"]},
+ {"quote": "Character is doing the right thing when nobody’s looking.", "by": "J. C. Watts", "q": "If money opened doors that aren’t open to everyone, I’d...", "opts": ["Go through them — that’s a millionaire’s perk", "Go through, but make sure nobody gets pushed to the back", "Stay in line — I’d rather keep it fair", "Go through, then figure out how to bring others along"]}
 ];
 
 const START_BALANCE = 20; // millions
-/* First-round playtests: every player takes exactly 4 turns as the Millionaire. */
-const ROUNDS_BY_PLAYERS = {3:4, 4:4, 5:4, 6:4};
+const MAX_PLAYERS = 4;   // prototype testing is limited to 3–4 players
+const CLOSER_IDX  = 19;  // Card 20 (Mae West) — always the final card played
+/* Prototype testing: 3–4 players, each taking exactly 5 turns as the Millionaire. */
+const ROUNDS_BY_PLAYERS = {3:5, 4:5};
 
 const GameLogic = {
   roundsFor(n){ return ROUNDS_BY_PLAYERS[n]; },
@@ -162,11 +164,13 @@ const GameLogic = {
     for(let i=a.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
     return a;
   },
-  /* Fixed play order (no shuffle); short games play the opening run then the two closers. */
+  /* Fixed numerical order, no shuffle. Card 20 (Mae West) is always played last,
+     so a 4-player game is exactly Cards 1-20 and a 3-player game is Cards 1-14 + 20. */
   buildDeck(n){
-    const total = this.totalCards(n);
-    if(total >= CARDS.length) return CARDS.slice();
-    return CARDS.slice(0, total-2).concat(CARDS.slice(-2));
+    const total = Math.min(this.totalCards(n), CARDS.length);
+    const closer = CARDS[CLOSER_IDX];
+    const pool = CARDS.filter((c,i) => i !== CLOSER_IDX);
+    return pool.slice(0, total-1).concat([closer]);
   }
 };
 
@@ -183,7 +187,7 @@ const HostGame = {
     };
   },
   addPlayer(g, name){
-    if(g.phase!=="lobby" || g.players.length>=6) return -1;
+    if(g.phase!=="lobby" || g.players.length>=MAX_PLAYERS) return -1;
     let nm = (name||"Player").trim().slice(0,14) || "Player";
     const names = new Set(g.players.map(p=>p.name));
     let base=nm, k=2; while(names.has(nm)) nm = base+" "+k++;
@@ -320,11 +324,19 @@ function introScreen(){
     <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">Why you're playing.</b> This is a test version — you are helping shape the game. As you play, pay attention to what stands out: Was it easy to learn? Was it fun and engaging? Did the pace feel right? Was anything confusing or missing? Every reaction — laughs, debates, surprises — helps make the game better.</p>
     <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">Game objective.</b> This game is about having fun — imagining great wealth and enjoying spirited conversations about one of life's important matters: MONEY! Your goal is to win the most money by betting correctly on how other players will answer questions about their new wealth.</p>
     <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">The game cards.</b> Some card situations may not perfectly match your real life — that's where imagination comes in. Choose the answer that best reflects you.</p>
-    <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">How to play.</b> One player is the Host, starts the game, and shares the room code the other players use to sign in. Each player begins with $20 million.</p>
-    <p class="muted" style="margin-top:8px">The Host goes first as the Millionaire; players then take turns being the Millionaire. Each card includes a short quote, a question, and 2–4 answer choices. The Millionaire reads the entire card aloud — including the quote — then secretly selects the answer that best fits them. Remember: now that you're rich, you can afford to be honest.</p>
-    <p class="muted" style="margin-top:8px">The other players then bet $1M, $2M, or $3M on what each Player thinks the Millionaire chose. Guess correctly and you receive the amount of your bet from the Bank; guess incorrectly and you lose it.</p>
-    <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">End of game.</b> After the final card is played, the player with the most money wins. Players who lose all their money are out of the game!</p>
-    <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">Game length.</b> Each player takes 4 turns as the Millionaire — 12 to 24 cards depending on the number of players (roughly 25 to 45 minutes).</p>
+    <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">How to play.</b> One player is the Host, starts the game, and tells the other players the Room Code for signing in.</p>
+    <p class="muted" style="margin-top:8px">Players then enter their name and the Room Code and click on Join the Game. Each player begins with $20 million in their account, which is displayed at the top of their screen.</p>
+    <p class="muted" style="margin-top:8px">The Host goes first as the Millionaire, and the Host's card is displayed.</p>
+    <p class="muted" style="margin-top:8px">Each card includes a short quote, a question, and 2–4 answer choices. The Millionaire then reads the entire card aloud, including the quote.</p>
+    <p class="muted" style="margin-top:8px">The Millionaire secretly selects the answer that best fits them. Remember: now that you're rich, you can afford to be honest.</p>
+    <p class="muted" style="margin-top:8px">The other players see the choices on their screen and then bet $1M, $2M, or $3M on what each thinks the Millionaire chose, and then click on Lock in My Bet.</p>
+    <p class="muted" style="margin-top:8px">Guess correctly, and the amount you bet increases your account; guess incorrectly, and you lose it.</p>
+    <p class="muted" style="margin-top:8px">The Host then clicks on the Next Card button — and the next Millionaire is automatically indicated on the top of the next card.</p>
+    <p class="muted" style="margin-top:8px">The Host remains the Host throughout the game and is responsible for clicking on Next Card after each result of the bets is revealed and conversation about the choices selected has stopped.</p>
+    <p class="muted" style="margin-top:8px">Play continues for 5 rounds, after which the game ends.</p>
+    <p class="muted" style="margin-top:8px">The player(s) with the most money is the winner. In the case of ties, the imaginary Winner's Cup goes to them.</p>
+    <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">Game length.</b> This prototype is set for 3 or 4 players, each taking 5 turns as the Millionaire — 15 or 20 cards (roughly 30 to 40 minutes).</p>
+    <p class="muted" style="margin-top:10px"><b style="color:var(--gold)">Please don't forget to fill out the Evaluation Form.</b></p>
     <button class="btn-gold" onclick="UI.toLanding()">Continue →</button>
   </div>`);
 }
@@ -334,7 +346,7 @@ function landing(){
   $( brand(false) + `
   <div class="panel">
     <h2>Play on Multiple Devices</h2>
-    <p class="muted">One player hosts and shares the room code. Everyone else joins from their own device. 3–6 players; everyone starts with <b style="color:var(--gold)">$20 MILLION</b>.</p>
+    <p class="muted">One player hosts and shares the room code. Everyone else joins from a separate device. 3–4 players; everyone starts with <b style="color:var(--gold)">$20 MILLION</b>.</p>
     <input type="text" id="nm" maxlength="14" placeholder="Your name" value="${esc(myName)}">
     <button class="btn-gold" onclick="UI.host()">Host a New Game</button>
     <div class="section-label">— or —</div>
@@ -547,7 +559,7 @@ function handleClientMsg(conn, d){
   if(!G || typeof d!=="object") return;
   if(d.t==="join"){
     const idx = HostGame.addPlayer(G, d.name);
-    if(idx<0){ conn.send({t:"reject", reason: G.phase!=="lobby" ? "Game already started." : "Room is full (6 players max)."}); return; }
+    if(idx<0){ conn.send({t:"reject", reason: G.phase!=="lobby" ? "Game already started." : "Room is full ("+MAX_PLAYERS+" players max)."}); return; }
     conn._pIdx = idx;
     conns.push(conn);
     conn.send({t:"welcome", idx, code:roomCode});
@@ -620,43 +632,50 @@ window.UI = {
 const gallery = document.getElementById("gallery");
 gallery.innerHTML = `<div class="gallery-intro">
   <h1>Design Review — every screen of the game</h1>
-  <p>Updated 7/30: end page now has a full gold "Evaluation Form" button matching the "Next Card" shape, and the
-  money rain is contained to the trophy/certificate area; Cards 3 and 8 revised. Note further requests by screen number.</p>
+  <p>Updated 7/31: deck resequenced so the 20 strongest cards are Cards 1–20, with Mae West
+  pinned as the closer; 5 rounds per player; 3–4 players (15 or 20 cards, ~30–40 min);
+  new How to Play text. Note further requests by screen number.</p>
 </div>`;
 function shot(num, title, note, setup){
   banner=""; pendingChoice=null; pendingBet=null;
   setup();
-  const sec = document.createElement("section");
+  const sec=document.createElement("section");
   sec.className="shot-wrap";
-  sec.innerHTML = `<div class="shot-label">Screen ${num} — ${title}${note?`<span class="shot-note"> · ${note}</span>`:""}</div><div class="shot">${app.innerHTML}</div>`;
+  sec.innerHTML=`<div class="shot-label">Screen ${num} — ${title}${note?`<span class="shot-note"> · ${note}</span>`:""}</div><div class="shot">${app.innerHTML}</div>`;
   gallery.appendChild(sec);
 }
-const P3 = [
+const P4=[
   {name:"Michael", balance:23, eliminated:false, connected:true},
   {name:"Barbara", balance:19, eliminated:false, connected:true},
-  {name:"Pat", balance:18, eliminated:false, connected:true}
+  {name:"Pat", balance:18, eliminated:false, connected:true},
+  {name:"Chris", balance:20, eliminated:false, connected:true}
 ];
-const baseSnap = {phase:"lobby", players:P3, millIdx:0, cardIdx:0, totalCards:12, card:CARDS[0], answered:false, betDone:{}, reveal:null, winners:null};
+const baseSnap={phase:"lobby", players:P4, millIdx:0, cardIdx:0, totalCards:20, card:CARDS[0], answered:false, betDone:{}, reveal:null, winners:null};
 
-shot(1, "Introduction page", "your Directions text, updated game length", ()=>{ role=null; snap=null; myIdx=0; introScreen(); });
-shot(2, "Welcome page", "host or join", ()=>{ role=null; snap=null; myIdx=0; landing(); });
-shot(3, "Lobby — host's view", "room code and player list (no quick-game option)", ()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap}; render(); });
-shot(4, "The Millionaire's card", "option B selected", ()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"answer"}; pendingChoice=1; render(); });
-shot(5, "Waiting for the Millionaire", "what everyone else sees meanwhile", ()=>{ role="client"; myIdx=1; snap={...baseSnap, phase:"answer"}; render(); });
-shot(6, "Betting screen", "guess + bet (option B and $2M selected)", ()=>{ role="client"; myIdx=1; snap={...baseSnap, phase:"betting", answered:true}; pendingChoice=1; pendingBet=2; render(); });
-shot(7, "Waiting for bets", "the Millionaire watches bets lock in", ()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"betting", answered:true, betDone:{1:true}}; render(); });
-shot(8, "The reveal", "answer shown, wins and losses settled", ()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"reveal",
+shot(1,"Introduction page","new How to Play text, 5 rounds, 3–4 players",()=>{ role=null; snap=null; myIdx=0; introScreen(); });
+shot(2,"Welcome page","host or join",()=>{ role=null; snap=null; myIdx=0; landing(); });
+shot(3,"Lobby — host's view","room code and player list (4 players)",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap}; render(); });
+shot(4,"Card 1 — the opener","option B selected",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"answer"}; pendingChoice=1; render(); });
+shot(5,"Waiting for the Millionaire","what everyone else sees meanwhile",()=>{ role="client"; myIdx=1; snap={...baseSnap, phase:"answer"}; render(); });
+shot(6,"Betting screen","guess + bet (option B and $2M selected)",()=>{ role="client"; myIdx=1; snap={...baseSnap, phase:"betting", answered:true}; pendingChoice=1; pendingBet=2; render(); });
+shot(7,"Waiting for bets","the Millionaire watches bets lock in",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"betting", answered:true, betDone:{1:true,2:true}}; render(); });
+shot(8,"The reveal","answer shown, wins and losses settled",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"reveal",
   reveal:{answer:1, millIdx:0, results:[
-    {idx:1, name:"Barbara", choice:1, bet:2, won:true,  balance:21, out:false},
-    {idx:2, name:"Pat",     choice:3, bet:3, won:false, balance:15, out:false}
+    {idx:1,name:"Barbara",choice:1,bet:2,won:true, balance:21,out:false},
+    {idx:2,name:"Pat",    choice:3,bet:3,won:false,balance:15,out:false},
+    {idx:3,name:"Chris",  choice:1,bet:1,won:true, balance:21,out:false}
   ]}}; render(); });
-shot(9, "End of game — Grand Prize", "certificate, contained money rain, and the Evaluation Form button", ()=>{ role="host"; myIdx=0; snap={phase:"end",
+shot(9,"Card 9 — J. Paul Getty","the rewritten investment card",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"answer", card:CARDS[8], cardIdx:8}; render(); });
+shot(10,"Card 11 — the two-option card","the quick palate cleanser mid-game",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"answer", card:CARDS[10], cardIdx:10}; render(); });
+shot(11,"Card 20 — Mae West, the closer","always the final card played",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"answer", card:CARDS[19], cardIdx:19}; render(); });
+shot(12,"End of game — Grand Prize","certificate, money rain, Evaluation Form button",()=>{ role="host"; myIdx=0; snap={phase:"end",
   players:[
-    {name:"Michael", balance:31, eliminated:false, connected:true},
-    {name:"Barbara", balance:24, eliminated:false, connected:true},
-    {name:"Pat",     balance:5,  eliminated:false, connected:true}
-  ], winners:["Michael"], totalCards:12, cardIdx:11, millIdx:0, betDone:{}, card:null, reveal:null}; render(); });
-shot(10, "Error message", "example of how problems are reported", ()=>{ role=null; snap=null; banner="Room KQ7M not found. Double-check the code — and if the host\u2019s screen went to sleep, the room closed: the host should tap \u2018Host a New Game\u2019 for a fresh code."; landing(); });
+    {name:"Michael",balance:31,eliminated:false,connected:true},
+    {name:"Barbara",balance:24,eliminated:false,connected:true},
+    {name:"Chris",  balance:20,eliminated:false,connected:true},
+    {name:"Pat",    balance:5, eliminated:false,connected:true}
+  ], winners:["Michael"], totalCards:20, cardIdx:19, millIdx:0, betDone:{}, card:null, reveal:null}; render(); });
+shot(13,"Error message","example of how problems are reported",()=>{ role=null; snap=null; banner="Room KQ7M not found. Double-check the code — and if the host\u2019s screen went to sleep, the room closed: the host should tap \u2018Host a New Game\u2019 for a fresh code."; landing(); });
 })();
 </script>
 </body>
