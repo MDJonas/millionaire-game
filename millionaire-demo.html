@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>You Just Became a MILLIONAIRE® — Demo</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MILLIONAIRE">
+<meta name="theme-color" content="#081E3B">
+<style>
+  :root{
+    --navy:#081E3B; --navy-deep:#081E3B; --navy-card:#0E2A4F;
+    --cream:#F5EFE2; --cream-panel:#F7F1E3; --gold:#FFC72C; --gold2:#E0B01E; --gold-soft:#EFE3C2;
+    --orange:#f5a623; --green:#4cd97b; --red:#ff6b6b;
+    --ink:#0A1A2F;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:#081E3B;
+    min-height:100vh; color:var(--cream);
+    font-family:"Trebuchet MS", "Segoe UI", Helvetica, Arial, sans-serif;
+    display:flex; flex-direction:column; align-items:center;
+  }
+  #app{width:100%; max-width:560px; padding:16px 16px 50px; flex:1;}
+  .brand{text-align:center; margin:14px 0 4px;}
+  .brand .script{font-family:"Snell Roundhand","Brush Script MT","Segoe Script",cursive; font-size:1.55rem; color:#f7ecc4;}
+  .brand .title{font-family:Georgia,"Times New Roman",serif; letter-spacing:.12em; font-size:2.3rem; font-weight:400;
+    color:#f5d576;
+    background:linear-gradient(180deg,#FFF3C8 0%,#FFD75E 30%,#FFC72C 55%,#FFF0B0 80%,#E0B01E 100%);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 1px 7px rgba(247,221,138,.4));}
+  .brand .title sup{font-size:.85rem;}
+  .brand .tagline{color:var(--orange); font-style:italic; font-size:.95rem; margin-top:3px;}
+  .panel{background:rgba(255,255,255,.04); border:1px solid rgba(232,217,160,.25); border-radius:36px; padding:20px 20px 34px; margin-top:16px;}
+  h2{font-family:"Trebuchet MS",sans-serif; font-weight:700; color:var(--gold-soft); letter-spacing:.03em; margin-bottom:10px;}
+  p.muted{color:rgba(236,224,184,.75); font-size:.94rem; line-height:1.5;}
+  button{cursor:pointer; border:none; border-radius:10px; font-size:1rem; font-weight:600; padding:13px 20px; transition:transform .08s, opacity .15s;}
+  button:active{transform:scale(.97);}
+  button:disabled{opacity:.35; cursor:not-allowed;}
+  .btn-gold{background:linear-gradient(180deg,#FFD75E,#EFB80D); color:#231a00; width:100%; margin-top:14px; font-size:1.05rem;}
+  .btn-ghost{background:transparent; border:1px solid rgba(232,217,160,.4); color:var(--cream); width:100%; margin-top:10px;}
+  input[type=text]{width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(232,217,160,.35); background:rgba(255,255,255,.06); color:var(--cream); font-size:1.05rem; outline:none; margin-top:10px;}
+  input[type=text]:focus{border-color:var(--gold);}
+  .code-display{font-family:"Trebuchet MS",sans-serif; font-size:2.4rem; letter-spacing:.35em; color:var(--gold); text-align:center; margin:12px 0 4px; text-indent:.35em;}
+  #scoreboard{display:flex; flex-wrap:wrap; gap:7px; justify-content:center; margin-top:12px;}
+  .chip{background:rgba(6,24,47,.75); border:1.5px solid var(--gold2); border-radius:20px; padding:6px 13px; font-size:.84rem; font-weight:600;}
+  .chip.mill{background:rgba(245,179,1,.15); box-shadow:0 0 9px rgba(245,179,1,.35);}
+  .chip.out{opacity:.4; text-decoration:line-through;}
+  .chip.me{box-shadow:0 0 0 1.5px var(--cream);}
+  .chip.gone{opacity:.4; font-style:italic;}
+  .chip b{color:var(--gold);}
+  .progress{text-align:center; font-size:.78rem; color:rgba(236,224,184,.6); margin-top:8px; letter-spacing:.08em;}
+  .qcard{background:var(--cream-panel); color:var(--ink); border-radius:14px; padding:9px; margin:12px auto 0; width:91.5%; box-shadow:0 8px 24px rgba(0,0,0,.45);}
+  .qframe{border:1px solid var(--gold2); border-radius:9px; padding:16px 14px; box-shadow:0 0 0 2px rgba(224,176,30,.18);}
+  .qcard .qquote{font-family:"Trebuchet MS",sans-serif; font-style:italic; font-weight:700; font-size:1.06rem; color:#0A1A2F; text-align:center; line-height:1.45;}
+  .qcard .qby{display:block; text-align:right; font-size:.78rem; color:#5c5647; margin-top:7px; padding-right:6px;}
+  .qsep{display:block; width:84%; max-width:300px; margin:11px auto 10px;}
+  .qcard .qtext{font-size:1.1rem; line-height:1.4; font-weight:700; color:#0A1A2F; text-align:center;}
+  .role-line{margin-top:16px; text-align:center; font-size:1rem; color:var(--cream);}
+  .read-aloud{text-align:center; font-size:.76rem; letter-spacing:.13em; color:var(--gold-soft); margin-top:6px; text-transform:uppercase; font-weight:700;}
+  .opt{display:flex; gap:12px; align-items:center; width:100%; text-align:left; background:var(--navy-card); border:1.2px solid rgba(247,241,227,.6); color:var(--cream); border-radius:26px; padding:11px 14px; margin-top:9px; font-weight:500; font-size:.95rem;}
+  .opt .letter{background:var(--gold); color:#231a00; border-radius:50%; min-width:27px; height:27px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.88rem;}
+  .opt.sel{border-color:var(--gold); background:#12395F; box-shadow:0 0 0 1.5px var(--gold);}
+  .btn-lock{text-transform:uppercase; letter-spacing:.06em; width:87%; display:block; margin-left:auto; margin-right:auto;}
+  .bets{display:flex; gap:10px; justify-content:center; margin-top:14px;}
+  .bet-chip{width:72px; height:72px; border-radius:50%; font-size:.92rem; font-weight:800; background:radial-gradient(circle at 35% 30%, #FFE08A, #D9A400 75%); color:#3a2a00; border:3px dashed rgba(255,255,255,.55);}
+  .bet-chip.sel{outline:4px solid var(--cream); outline-offset:2px;}
+  .section-label{margin-top:16px; text-align:center; font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; color:rgba(236,224,184,.65);}
+  .waiting{ text-align:center; padding:18px 8px; }
+  .waiting .dots::after{content:"…"; animation:blink 1.4s infinite;}
+  @keyframes blink{0%{opacity:.2}50%{opacity:1}100%{opacity:.2}}
+  .lock-list{display:flex; flex-wrap:wrap; gap:7px; justify-content:center; margin-top:12px;}
+  .lock-pill{border-radius:16px; padding:4px 12px; font-size:.8rem; background:rgba(255,255,255,.06); border:1px solid rgba(232,217,160,.25);}
+  .lock-pill.done{border-color:var(--green); color:var(--green);}
+  .reveal-answer{text-align:center; margin-top:12px; padding:14px; border-radius:12px; background:rgba(245,179,1,.12); border:1px solid var(--gold);}
+  .reveal-answer .big{font-size:1.35rem; color:var(--gold); font-family:"Trebuchet MS",sans-serif;}
+  .result-row{display:flex; justify-content:space-between; align-items:center; padding:10px 13px; border-radius:10px; margin-top:7px; background:rgba(255,255,255,.05); font-size:.92rem;}
+  .win{color:var(--green); font-weight:700;}
+  .lose{color:var(--red); font-weight:700;}
+  .winner-box{text-align:center; padding:20px 8px; position:relative; overflow:hidden;}
+  .rain{position:absolute; inset:0; pointer-events:none;}
+  .drop{position:absolute; top:-56px; font-size:2.2rem; opacity:.85; animation-name:fall; animation-timing-function:linear; animation-iteration-count:infinite;}
+  @keyframes fall{ to{ transform:translateY(620px) rotate(300deg); } }
+  .prize-cert{position:relative; background:var(--cream-panel); color:var(--ink); border:3px double var(--gold2); border-radius:12px; padding:18px 16px; margin:14px auto 0; max-width:420px; box-shadow:0 8px 24px rgba(0,0,0,.4);}
+  .pc-head{font-family:"Trebuchet MS",sans-serif; letter-spacing:.22em; text-transform:uppercase; font-size:.72rem; color:#7a6520;}
+  .pc-title{font-family:"Trebuchet MS",sans-serif; font-size:1.35rem; color:#101c4f; font-weight:700; margin-top:6px;}
+  .pc-sub{font-size:.8rem; color:#5f4d15; margin-top:6px; font-style:italic;}
+  .pc-name{font-family:"Trebuchet MS",sans-serif; font-size:1.7rem; color:#b8860b; font-weight:700; margin-top:4px;}
+  .winner-box .trophy{font-size:2.8rem;}
+  .winner-box .wname{font-size:1.8rem; color:var(--gold); font-family:"Trebuchet MS",sans-serif; margin:8px 0;}
+  .standing{display:flex; justify-content:space-between; padding:9px 15px; border-radius:10px; background:rgba(255,255,255,.05); margin-top:7px;}
+  .banner{background:rgba(255,107,107,.12); border:1px solid var(--red); color:var(--red); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:.88rem; text-align:center;}
+  .lobby-player{display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; background:rgba(255,255,255,.05); margin-top:8px;}
+  .lobby-player .dot{width:9px; height:9px; border-radius:50%; background:var(--green);}
+  footer{font-size:.7rem; color:rgba(236,224,184,.45); text-align:center; padding:12px;}
+
+  /* ---------- DEMO CHROME ---------- */
+  body{display:block;}
+  #demo{max-width:860px; margin:0 auto; padding:16px 14px 40px;}
+  .demo-head{text-align:center;}
+  .demo-head .script{font-family:"Snell Roundhand","Brush Script MT",cursive; font-size:1.35rem; color:#f7ecc4;}
+  .demo-head .title{font-family:Georgia,serif; letter-spacing:.12em; font-size:1.95rem;
+    background:linear-gradient(180deg,#FFF3C8 0%,#FFD75E 30%,#FFC72C 55%,#FFF0B0 80%,#E0B01E 100%);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;}
+  .demo-head .title sup{font-size:.78rem;}
+  .capbar{margin:14px auto 2px; text-align:center; min-height:84px;
+    display:flex; flex-direction:column; justify-content:center;}
+  .capbar .step{font-size:.68rem; letter-spacing:.22em; text-transform:uppercase; color:var(--gold2); font-weight:700;}
+  .capbar .cap{font-size:1.24rem; line-height:1.4; color:#F7F1E3; margin-top:7px; font-weight:600;}
+  .capbar .sub{font-size:.9rem; color:rgba(236,224,184,.7); margin-top:6px; font-style:italic;}
+  .stage{display:flex; gap:22px; justify-content:center; flex-wrap:wrap; margin-top:14px;}
+  .phone{flex:0 0 330px; width:330px;}
+  .phone-label{text-align:center; font-size:.8rem; font-weight:700; letter-spacing:.04em;
+    color:rgba(236,224,184,.65); padding:5px 0 8px; min-height:34px;}
+  .phone.active .phone-label{color:var(--gold);}
+  .phone-body{border:10px solid #16273f; border-radius:32px; background:#081E3B; overflow:hidden;
+    min-height:560px; box-shadow:0 10px 30px rgba(0,0,0,.5); transition:border-color .3s, box-shadow .3s;}
+  .phone.active .phone-body{border-color:var(--gold2);
+    box-shadow:0 0 0 2px rgba(255,199,44,.28), 0 12px 34px rgba(0,0,0,.55);}
+  .phone-body .screen{padding:10px 11px 22px;}
+  .phone-body .panel{border-radius:24px; padding:15px 14px 20px; margin-top:11px;}
+  .phone-body h2{font-size:1.05rem;}
+  .phone-body p.muted{font-size:.8rem; line-height:1.42;}
+  .phone-body .brand{margin:6px 0 2px;}
+  .phone-body .brand .script{font-size:1rem;}
+  .phone-body .brand .title{font-size:1.34rem;}
+  .phone-body .chip{font-size:.68rem; padding:4px 10px;}
+  .phone-body .opt{font-size:.78rem; padding:9px 11px; border-radius:20px; margin-top:7px;}
+  .phone-body .opt .letter{min-width:22px; height:22px; font-size:.72rem;}
+  .phone-body .qcard .qquote{font-size:.87rem;}
+  .phone-body .qcard .qtext{font-size:.88rem;}
+  .phone-body .qcard .qby{font-size:.65rem;}
+  .phone-body .bet-chip{width:56px; height:56px; font-size:.78rem;}
+  .phone-body button{font-size:.8rem; padding:10px 12px;}
+  .phone-body .role-line{font-size:.84rem; margin-top:12px;}
+  .phone-body .read-aloud{font-size:.62rem;}
+  .phone-body .code-display{font-size:1.75rem;}
+  .phone-body .result-row{font-size:.74rem; padding:8px 10px;}
+  .phone-body .reveal-answer .big{font-size:1rem;}
+  .phone-body .standing{font-size:.78rem; padding:7px 12px;}
+  .phone-body .prize-cert{padding:14px 12px;}
+  .phone-body .pc-title{font-size:1.08rem;}
+  .phone-body .pc-name{font-size:1.35rem;}
+  .phone-body .trophy{font-size:2.1rem;}
+  .phone-body .lock-pill{font-size:.68rem;}
+  .phone-body .section-label{font-size:.65rem;}
+  .controls{display:flex; gap:9px; justify-content:center; align-items:center; margin-top:22px; flex-wrap:wrap;}
+  .controls button{background:rgba(255,255,255,.07); border:1px solid rgba(232,217,160,.35); color:var(--cream);
+    border-radius:9px; padding:9px 15px; font-size:.86rem; font-weight:600; cursor:pointer;}
+  .controls button:hover{background:rgba(255,255,255,.13);}
+  .controls button.primary{background:linear-gradient(180deg,#FFD75E,#EFB80D); color:#231a00; border:none; min-width:112px;}
+  .dots{display:flex; gap:7px; justify-content:center; margin-top:15px; flex-wrap:wrap;}
+  .dot{width:9px; height:9px; border-radius:50%; background:rgba(232,217,160,.28); cursor:pointer; transition:.2s;}
+  .dot.on{background:var(--gold); transform:scale(1.35);}
+  .dot.seen{background:rgba(255,199,44,.5);}
+  @media(max-width:760px){
+    .stage{gap:16px;}
+    .phone{flex:0 0 300px; width:300px;}
+    .capbar .cap{font-size:1.08rem;}
+  }
+</style>
+</head>
+<body>
+<div id="demo">
+  <div class="demo-head">
+    <div class="script">You Just Became a</div>
+    <div class="title">MILLIONAIRE<sup>&reg;</sup></div>
+  </div>
+  <div class="capbar"><div class="step" id="stepNum"></div><div class="cap" id="capText"></div><div class="sub" id="capSub"></div></div>
+  <div class="stage" id="stage">
+    <div class="phone" id="phA"><div class="phone-label" id="labA"></div><div class="phone-body"><div class="screen" id="scrA"></div></div></div>
+    <div class="phone" id="phB"><div class="phone-label" id="labB"></div><div class="phone-body"><div class="screen" id="scrB"></div></div></div>
+  </div>
+  <div class="controls">
+    <button onclick="DEMO.prev()">&#9664;&nbsp; Back</button>
+    <button class="primary" id="playBtn" onclick="DEMO.toggle()">&#10073;&#10073;&nbsp; Pause</button>
+    <button onclick="DEMO.next()">Next &nbsp;&#9654;</button>
+    <button onclick="DEMO.restart()">&#8635;&nbsp; Restart</button>
+  </div>
+  <div class="dots" id="dots"></div>
+</div>
+<div id="app" style="display:none"></div>
+<footer>You Just Became a MILLIONAIRE® &nbsp;•&nbsp; © Time for Two, Inc. 1991, 2016, 2023, 2026 &nbsp;•&nbsp; Demonstration film — not a playable build</footer>
+
+<script id="game-logic">
+/* ============ PURE GAME LOGIC + HOST STATE MACHINE (no DOM) ============ */
+/* Current deck (7/31/2026) — 29 cards. Cards 1–20 are the prototype game;
+   Card 20 (Mae West) is pinned as the closer so every game ends on it.
+   Cards 21–29 stay in the deck but are not reached at 3–4 players. */
+const CARDS = [
+ {"quote": "I literally danced around the living room shouting, ‘I’m rich!’", "by": "Anonymous lottery winner", "q": "When I realized I was a millionaire, the first thing I did was...", "opts": ["Jump up and down, barely making sense", "Completely freeze — or possibly faint", "Sit calmly, thinking, “Well, that’s cool.”", "Run out the door shouting, “Let the buying begin!”"]},
+ {"quote": "I don’t know much about being a millionaire, but I’ll bet I’d be darling at it.", "by": "Dorothy Parker", "q": "How confident are you that you’d pull off being a millionaire?", "opts": ["Completely — I’d make it look effortless", "I’d need a rehearsal period to get used to all that attention", "I’d keep waiting for someone to tell me there’d been a mistake", "I’d absolutely pull it off — right until taxes and chaos kicked in"]},
+ {"quote": "I’ve been rich, and I’ve been poor. Rich is better.", "by": "Beatrice Kaufman", "q": "To really feel wealthy, I will...", "opts": ["Announce in a crowded restaurant, “Food and drinks on me!”", "Charter a private jet for a spontaneous getaway", "Keep a full-time masseuse on staff", "Have exotic international foods flown in"]},
+ {"quote": "The millionaire next door may still be clipping coupons.", "by": "Thomas J. Stanley", "q": "Even as a millionaire, I will probably still...", "opts": ["Recalculate the tip in my head, just to be sure", "Open three apps to see who has the better deal", "Say “I can’t afford that” out of habit", "Hoard reward points like treasure"]},
+ {"quote": "Money may not buy happiness, but it sure buys better service.", "by": "Will Rogers", "q": "The one thing I’ll now do to receive better treatment is...", "opts": ["Casually flash my premium credit card or app", "Remember names — especially the useful ones", "Spend lavishly on holiday gifts", "Slip them a tip right up front"]},
+ {"quote": "Life isn’t meant to just be lived — it should be celebrated.", "by": "Osho", "q": "No more paper plates and balloons for my birthday. This year I’m going to...", "opts": ["Throw a dart at a map and travel to wherever it lands", "Rent out an entire theme park for my friends", "Hire a photographer and glam squad — every angle says “ageless”", "Walk in my ancestors’ footsteps — a heritage trip without the hard parts"]},
+ {"quote": "Real generosity comes with no strings attached and no expectations.", "by": "Suze Orman", "q": "When someone close to me is struggling financially, I will...", "opts": ["Anonymously pay their bills", "Offer a no-strings-attached loan", "Give financial advice instead", "Avoid getting involved"]},
+ {"quote": "It’s really hard to be roommates with people if your suitcases are much better than theirs.", "by": "J. D. Salinger", "q": "So that my family and friends will not be jealous, I’m most likely to...", "opts": ["Cut the labels out of my designer clothes", "Claim I won my Lamborghini in a raffle", "Tell them my jewels are costume (even if they aren’t)", "Introduce my new staff as friends helping with my projects"]},
+ {"quote": "Formula for success: Rise early, work hard, strike oil.", "by": "J. Paul Getty", "q": "If I were going to strike it rich today, I’d get involved with:", "opts": ["Bitcoins — because nothing says stability like a 40% swing in asset value", "AI companies — because if robots take over, I’d want to be a shareholder", "Prediction markets — because it turns “I told you so” into income", "High-risk, high-return stocks — because who needs to sleep through the night?"]},
+ {"quote": "It is not what you know, but who you know.", "by": "Harold Geneen", "q": "It’s 1 p.m. and I’m lunching at an exclusive spot with my favorite celebrity, who is a...", "opts": ["Oscar-winning actor", "Well-known sports figure", "World leader", "Tech founder"]},
+ {"quote": "Some people love to haggle. I’d rather have the keys.", "by": "Michael David", "q": "My dream car is sitting in the showroom. If I negotiated, the price would be much lower. But why hassle? I’ll just pay the list price and drive away.", "opts": ["Agree", "Disagree"]},
+ {"quote": "I’m not anti-social. I’m just not user-friendly.", "by": "Bill Murray", "q": "In order to maintain my privacy, the one thing I am most likely to do is...", "opts": ["Wear big dark sunglasses", "Change my name", "Build iron gates around my house", "Move to a town where no one knows me"]},
+ {"quote": "Good health is the real wealth.", "by": "Mahatma Gandhi", "q": "To ensure I stay healthy to fully enjoy my new wealth, I will invest both my time and money in...", "opts": ["A trainer, a nutritionist, and someone to make me actually show up", "VIP doctors and tests I didn’t know existed", "Spa retreats that somehow count as “health investments”", "A cryogenic backup plan — just in case"]},
+ {"quote": "Why cook when you can be cooked for?", "by": "Bette Midler", "q": "My relationship with food will now include...", "opts": ["A private chef", "Daily restaurant dining", "Gourmet meal delivery", "Cooking as a hobby"]},
+ {"quote": "I’m not going to buy my kids an encyclopedia. Let them walk to school like I did.", "by": "Yogi Berra", "q": "The “character-building” hardship I’d be most likely to impose on my kids is...", "opts": ["Make them use a paper map instead of GPS", "Refuse to give them the Wi-Fi password until chores are done", "Make them use a phone to order pizza instead of using an app", "Make them fly Economy while I fly First Class"]},
+ {"quote": "I like my money where I can see it: hanging in my closet.", "by": "Carrie Bradshaw", "q": "An indulgence I will never feel guilty about is...", "opts": ["A dream car that makes me smile when I drive", "Building the ultimate home entertainment space", "Having a personal assistant who manages my digital life", "Custom tailoring everything for the perfect fit"]},
+ {"quote": "The sweetest gifts are the ones that don’t check who’s watching.", "by": "Anonymous", "q": "I donated a huge sum to a charity gala. Would I be offended if I didn’t get tagged in any posts or stories?", "opts": ["Definitely mind — I want recognition", "Prefer to stay anonymous — the giving is enough", "I’d only want recognition if it helps the cause", "I’d pretend not to care, but be secretly a little disappointed"]},
+ {"quote": "All our dreams can come true, if we have the courage to pursue them.", "by": "Walt Disney", "q": "The wildest thing I will seriously consider doing is...", "opts": ["Running for political office", "Funding a movie about my life", "Buying a castle", "Creating a private festival"]},
+ {"quote": "The best things in life are free. The second best are very expensive.", "by": "Coco Chanel", "q": "The most annoying “hidden cost” of my new lifestyle will be...", "opts": ["Privacy — I miss being able to walk around unnoticed", "Staff — everything I own needs someone to manage it", "Taxes — the government is also celebrating my success", "Stress — finding out that “money” brings different problems"]},
+ {"quote": "You only live once, but if you do it right, once is enough.", "by": "Mae West", "q": "The most underrated luxury will be...", "opts": ["A morning without alarms", "A personal assistant or driver", "Sleeping without money worries", "Time completely to myself"]},
+ {"quote": "The power of money is the power of choice.", "by": "Proverb", "q": "The freedom I will enjoy the most is...", "opts": ["Never working again", "Traveling anytime, anywhere", "Buying whatever I want", "Saying no to things I don’t want to do"]},
+ {"quote": "The purpose of life is to live it, to taste experience to the utmost.", "by": "Eleanor Roosevelt", "q": "If my life became a highlight reel, what moments would I chase most?", "opts": ["Front-row or VIP moments — premieres and backstage experiences", "Once-in-a-lifetime nature moments — Northern Lights and safari migrations", "Deep personal moments — reunions and multi-generation vacations", "“I can’t believe we did that” — spontaneous last-minute flights and surprise parties"]},
+ {"quote": "Money... you thought of nothing else if you didn’t have it, and thought of other things if you did.", "by": "James Baldwin", "q": "Now that the bills are paid, the other things I’ll focus on are...", "opts": ["Support causes making the world a better place", "Having new adventures I used to call too expensive", "Learning, growing and challenging myself", "Savoring the good life — just because I can"]},
+ {"quote": "Never invest in anything that eats or needs repairing.", "by": "Billy Rose", "q": "My first investment will probably be in...", "opts": ["Diamonds, rubies and emeralds — especially since they look great on me", "Real estate — a beach house here, a ski cabin there", "The stock market — only in “blue chips”", "Cryptocurrency — high risk, high return"]},
+ {"quote": "Giving is not just about making a donation. It is about making a difference.", "by": "Kathy Calvin", "q": "My charitable giving will focus mostly on...", "opts": ["Causes that have personally touched my life", "High-profile global charities", "Local grassroots community projects", "Tax-exempt foundations"]},
+ {"quote": "The price of anything is the amount of life you exchange for it.", "by": "Henry David Thoreau", "q": "Now that I’m a millionaire, the biggest change I’ll make in how I spend my time is...", "opts": ["Guard my time — only say yes to what excites me", "Buy back my time — hello cleaners, assistants, and takeout", "Slow down — leave more space for unplanned days", "Show up more — prioritize time with family and friends"]},
+ {"quote": "The greatest threat to our planet is the belief that someone else will save it.", "by": "Robert Swan", "q": "“There’s a global energy crisis, and prices have skyrocketed...” I will...", "opts": ["Drive my luxury SUVs and just pay more", "Drive less", "Switch to electric/hybrid vehicles", "Invest in energy companies — the time is right"]},
+ {"quote": "Money can’t buy happiness, but it can make you awfully comfortable while you’re being miserable.", "by": "Clare Boothe Luce", "q": "The thing money would change most about my daily life is...", "opts": ["My stress level — fewer things to worry about", "My choices — more freedom to do what I want", "My generosity — more ability to help others", "My confidence — feeling like new doors are open"]},
+ {"quote": "Character is doing the right thing when nobody’s looking.", "by": "J. C. Watts", "q": "If money opened doors that aren’t open to everyone, I’d...", "opts": ["Go through them — that’s a millionaire’s perk", "Go through, but make sure nobody gets pushed to the back", "Stay in line — I’d rather keep it fair", "Go through, then figure out how to bring others along"]}
+];
+
+const START_BALANCE = 20; // millions
+const MAX_PLAYERS = 4;   // prototype testing is limited to 3–4 players
+const CLOSER_IDX  = 19;  // Card 20 (Mae West) — always the final card played
+/* Prototype testing: 3–4 players, each taking exactly 5 turns as the Millionaire. */
+const ROUNDS_BY_PLAYERS = {3:5, 4:5};
+
+const GameLogic = {
+  roundsFor(n){ return ROUNDS_BY_PLAYERS[n]; },
+  totalCards(n){ return n * this.roundsFor(n); },
+  estMinutes(n){ return Math.round(this.totalCards(n) * 1.875 / 5) * 5; },
+  shuffle(arr, rng){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+    return a;
+  },
+  /* Fixed numerical order, no shuffle. Card 20 (Mae West) is always played last,
+     so a 4-player game is exactly Cards 1-20 and a 3-player game is Cards 1-14 + 20. */
+  buildDeck(n){
+    const total = Math.min(this.totalCards(n), CARDS.length);
+    const closer = CARDS[CLOSER_IDX];
+    const pool = CARDS.filter((c,i) => i !== CLOSER_IDX);
+    return pool.slice(0, total-1).concat([closer]);
+  }
+};
+
+/* Host-authoritative state machine. Phases: lobby → answer → betting → reveal → end */
+const HostGame = {
+  create(hostName){
+    return {
+      phase:"lobby",
+      players:[{name:hostName, balance:START_BALANCE, eliminated:false, connected:true}],
+      deck:[], cardIdx:0, millIdx:0,
+      turn:null,        // {answer, bets:{idx:{choice,bet}}}
+      lastResults:null, // reveal payload
+      winners:null
+    };
+  },
+  addPlayer(g, name){
+    if(g.phase!=="lobby" || g.players.length>=MAX_PLAYERS) return -1;
+    let nm = (name||"Player").trim().slice(0,14) || "Player";
+    const names = new Set(g.players.map(p=>p.name));
+    let base=nm, k=2; while(names.has(nm)) nm = base+" "+k++;
+    g.players.push({name:nm, balance:START_BALANCE, eliminated:false, connected:true});
+    return g.players.length-1;
+  },
+  start(g, rng = Math.random, quick = false){
+    if(g.phase!=="lobby" || g.players.length<3) return false;
+    g.deck = quick ? CARDS.slice(0,1).concat(CARDS.slice(-2)) : GameLogic.buildDeck(g.players.length, rng);
+    g.cardIdx = 0; g.millIdx = 0;
+    g.phase = "answer";
+    g.turn = {answer:null, bets:{}};
+    return true;
+  },
+  activeIdxs(g){ return g.players.map((p,i)=>p.eliminated?-1:i).filter(i=>i>=0); },
+  bettorIdxs(g){ return this.activeIdxs(g).filter(i => i !== g.millIdx); },
+  maxBet(g, idx){ return Math.min(3, g.players[idx].balance); },
+  handleAnswer(g, idx, choice){
+    if(g.phase!=="answer" || idx!==g.millIdx) return false;
+    const card = g.deck[g.cardIdx];
+    if(!Number.isInteger(choice) || choice<0 || choice>=card.opts.length) return false;
+    g.turn.answer = choice;
+    g.phase = "betting";
+    return true;
+  },
+  handleBet(g, idx, choice, bet){
+    if(g.phase!=="betting") return false;
+    if(!this.bettorIdxs(g).includes(idx)) return false;
+    if(g.turn.bets[idx]) return false;
+    const card = g.deck[g.cardIdx];
+    if(!Number.isInteger(choice) || choice<0 || choice>=card.opts.length) return false;
+    if(!Number.isInteger(bet) || bet<1 || bet>this.maxBet(g, idx)) return false;
+    g.turn.bets[idx] = {choice, bet};
+    if(Object.keys(g.turn.bets).length === this.bettorIdxs(g).length) this._settle(g);
+    return true;
+  },
+  _settle(g){
+    const answer = g.turn.answer;
+    const results = Object.entries(g.turn.bets).map(([k,b])=>{
+      const idx = +k, p = g.players[idx];
+      const won = b.choice === answer;
+      p.balance += won ? b.bet : -b.bet;
+      if(p.balance<=0){ p.balance=0; p.eliminated=true; }
+      return {idx, name:p.name, choice:b.choice, bet:b.bet, won, balance:p.balance, out:p.eliminated};
+    });
+    g.lastResults = {answer, results, cardIdx:g.cardIdx, millIdx:g.millIdx};
+    g.cardIdx++;
+    g.phase = "reveal";
+  },
+  next(g){
+    if(g.phase!=="reveal") return false;
+    if(g.cardIdx >= g.deck.length || this.activeIdxs(g).length < 2){ this._end(g); return true; }
+    let i = g.millIdx;
+    for(let s=0; s<g.players.length; s++){
+      i=(i+1)%g.players.length;
+      if(!g.players[i].eliminated){ g.millIdx=i; break; }
+    }
+    g.turn = {answer:null, bets:{}};
+    g.phase = "answer";
+    return true;
+  },
+  _end(g){
+    const top = Math.max(...g.players.map(p=>p.balance));
+    g.winners = g.players.filter(p=>p.balance===top).map(p=>p.name);
+    g.phase = "end";
+  },
+  /* Snapshot broadcast to everyone — secrets stripped. */
+  snapshot(g){
+    const betDone = {}; Object.keys(g.turn?.bets||{}).forEach(k=>betDone[k]=true);
+    return {
+      phase:g.phase,
+      players:g.players.map(p=>({name:p.name, balance:p.balance, eliminated:p.eliminated, connected:p.connected})),
+      millIdx:g.millIdx, cardIdx:Math.min(g.cardIdx, Math.max(g.deck.length-1,0)),
+      totalCards:g.deck.length,
+      card:(g.phase==="answer"||g.phase==="betting") ? g.deck[g.cardIdx] : (g.phase==="reveal" ? g.deck[g.lastResults.cardIdx] : null),
+      answered:(g.phase==="betting"||g.phase==="reveal"),
+      betDone,
+      reveal:g.phase==="reveal" ? g.lastResults : null,
+      winners:g.winners
+    };
+  }
+};
+if(typeof module!=="undefined") module.exports = {CARDS, GameLogic, HostGame, START_BALANCE};
+</script>
+
+<script id="net-ui">
+/* ============ NETWORK + UI LAYER ============ */
+(function(){
+if(typeof document==="undefined") return;
+const app = document.getElementById("app");
+const $ = h => { app.innerHTML = h; window.scrollTo(0,0); };
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const M = v => "$"+v+"M";
+const LETTERS = ["A","B","C","D"];
+const CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+
+/* role: "host" | "client" */
+let role=null, peer=null, conns=[], hostConn=null;
+let G=null;                 // host: authoritative state
+let snap=null;              // latest snapshot (both roles)
+let myIdx=0;                // my player index
+let myName="";
+let roomCode="";
+let banner="";
+let pendingChoice=null, pendingBet=null, lockedThisPhase=false, quickMode=false;
+
+function brand(small){
+  return `<div class="brand">
+    <div class="script">You Just Became a</div>
+    <div class="title" style="${small?'font-size:1.5rem':''}">MILLIONAIRE<sup>®</sup></div>
+  </div>`;
+}
+function scoreboard(){
+  if(!snap) return "";
+  const chips = snap.players.map((p,i)=>{
+    let cls="chip";
+    if(p.eliminated) cls+=" out";
+    else if(i===snap.millIdx && snap.phase!=="lobby" && snap.phase!=="end") cls+=" mill";
+    if(i===myIdx) cls+=" me";
+    if(!p.connected) cls+=" gone";
+    const crown = (i===snap.millIdx && !p.eliminated && snap.phase!=="lobby" && snap.phase!=="end") ? "👑 " : "";
+    return `<span class="${cls}">${crown}${esc(p.name)}${i===myIdx?" (you)":""} <b>${M(p.balance)}</b></span>`;
+  }).join("");
+  return `<div id="scoreboard">${chips}</div>`;
+}
+function bannerHtml(){ return banner ? `<div class="banner">${esc(banner)}</div>` : ""; }
+
+/* ---------- INTRODUCTION ---------- */
+function introScreen(){
+  $( brand(false) + `
+  <div class="panel">
+    <h2>Welcome — You're About to Get Rich!</h2>
+    <p class="muted"><b style="color:var(--gold-soft)">What this is.</b> A playable prototype of <b>You Just Became a MILLIONAIRE®</b> — a game about sudden wealth. You've just come into <b style="color:var(--gold)">$20 million</b>. What would you do with it? And more importantly, can the other players guess your choices — and can you guess theirs?</p>
+    <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">Why you're playing.</b> This is a test version — you are helping shape the game. As you play, pay attention to what stands out: Was it easy to learn? Was it fun and engaging? Did the pace feel right? Was anything confusing or missing? Every reaction — laughs, debates, surprises — helps make the game better.</p>
+    <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">Game objective.</b> This game is about having fun — imagining great wealth and enjoying spirited conversations about one of life's important matters: MONEY! Your goal is to win the most money by betting correctly on how other players will answer questions about their new wealth.</p>
+    <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">The game cards.</b> Some card situations may not perfectly match your real life — that's where imagination comes in. Choose the answer that best reflects you.</p>
+    <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">How to play.</b> One player is the Host, starts the game, and tells the other players the Room Code for signing in.</p>
+    <p class="muted" style="margin-top:8px">Players then enter their name and the Room Code and click on Join the Game. Each player begins with $20 million in their account, which is displayed at the top of their screen.</p>
+    <p class="muted" style="margin-top:8px">The Host goes first as the Millionaire, and the Host's card is displayed.</p>
+    <p class="muted" style="margin-top:8px">Each card includes a short quote, a question, and 2–4 answer choices. The Millionaire then reads the entire card aloud, including the quote.</p>
+    <p class="muted" style="margin-top:8px">The Millionaire secretly selects the answer that best fits them. Remember: now that you're rich, you can afford to be honest.</p>
+    <p class="muted" style="margin-top:8px">The other players see the choices on their screen and then bet $1M, $2M, or $3M on what each thinks the Millionaire chose, and then click on Lock in My Bet.</p>
+    <p class="muted" style="margin-top:8px">Guess correctly, and the amount you bet increases your account; guess incorrectly, and you lose it.</p>
+    <p class="muted" style="margin-top:8px">The Host then clicks on the Next Card button — and the next Millionaire is automatically indicated on the top of the next card.</p>
+    <p class="muted" style="margin-top:8px">The Host remains the Host throughout the game and is responsible for clicking on Next Card after each result of the bets is revealed and conversation about the choices selected has stopped.</p>
+    <p class="muted" style="margin-top:8px">Play continues for 5 rounds, after which the game ends.</p>
+    <p class="muted" style="margin-top:8px">The player(s) with the most money is the winner. In the case of ties, the imaginary Winner's Cup goes to them.</p>
+    <p class="muted" style="margin-top:10px"><b style="color:var(--gold-soft)">Game length.</b> This prototype is set for 3 or 4 players, each taking 5 turns as the Millionaire — 15 or 20 cards (roughly 30 to 40 minutes).</p>
+    <p class="muted" style="margin-top:10px"><b style="color:var(--gold)">Please don't forget to fill out the Evaluation Form.</b></p>
+    <button class="btn-gold" onclick="UI.toLanding()">Continue →</button>
+  </div>`);
+}
+
+/* ---------- LANDING ---------- */
+function landing(){
+  $( brand(false) + `
+  <div class="panel">
+    <h2>Play on Multiple Devices</h2>
+    <p class="muted">One player hosts and shares the room code. Everyone else joins from a separate device. 3–4 players; everyone starts with <b style="color:var(--gold)">$20 MILLION</b>.</p>
+    <input type="text" id="nm" maxlength="14" placeholder="Your name" value="${esc(myName)}">
+    <button class="btn-gold" onclick="UI.host()">Host a New Game</button>
+    <div class="section-label">— or —</div>
+    <input type="text" id="code" maxlength="4" placeholder="Room code (e.g. KQ7M)" style="text-transform:uppercase; text-align:center; letter-spacing:.3em">
+    <button class="btn-ghost" onclick="UI.join()">Join a Game</button>
+    ${bannerHtml()}
+  </div>`);
+}
+
+/* ---------- LOBBY ---------- */
+function lobbyScreen(){
+  const rows = snap.players.map((p,i)=>`
+    <div class="lobby-player"><span class="dot" style="${p.connected?'':'background:var(--red)'}"></span>${esc(p.name)}${i===0?" (host)":""}${i===myIdx?" — you":""}</div>`).join("");
+  const n = snap.players.length;
+  const info = n>=3 ? `${n} players → ${GameLogic.roundsFor(n)} turns each → ${GameLogic.totalCards(n)} cards ≈ ${GameLogic.estMinutes(n)} minutes` : `Waiting for at least 3 players…`;
+  $( brand(false) + `
+  <div class="panel">
+    <h2 style="text-align:center">Room Code</h2>
+    <div class="code-display">${esc(roomCode)}</div>
+    <p class="muted" style="text-align:center">Others: open this same file (or page) on your device,<br>enter your name and this code, and tap <i>Join</i>.</p>
+    <div style="margin-top:16px">${rows}</div>
+    <p class="muted" style="text-align:center; margin-top:12px">${info}</p>
+    ${role==="host" ? `<button class="btn-gold" ${n<3?"disabled":""} onclick="UI.start()">Start the Game</button>`
+                    : `<div class="waiting"><p class="muted dots">Waiting for the host to start</p></div>`}
+    ${bannerHtml()}
+  </div>`);
+}
+
+/* ---------- GAME SCREENS (render from snapshot) ---------- */
+function render(){
+  if(!snap){ landing(); return; }
+  if(snap.phase==="lobby"){ lobbyScreen(); return; }
+  if(snap.phase==="answer") return answerScreen();
+  if(snap.phase==="betting") return bettingScreen();
+  if(snap.phase==="reveal") return revealScreen();
+  if(snap.phase==="end") return endScreen();
+}
+function cardHtml(){
+  return `<div class="qcard"><div class="qframe">
+    <div class="qquote">“${esc(snap.card.quote)}”</div>
+    <div class="qby">— ${esc(snap.card.by)}</div>
+    <img class="qsep" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUoAAAAQCAYAAABwSzYgAAACYklEQVR4nO3asWrbQBzH8a9KHsEPEQ+GQA1ZsnXQE2QoKOCtdOvc7p27lW6FCjIUsmvvYlAh0MF6iLyDOuguOQvJOsmSda1/n+UElk9/6f53ujsbRAKSp/EiT+PF3HGIuF7NHYBIzeXcAYjUaaCU0KzQYCmB0UApIVrNHYCI62LuAESsPI0XEbwFdnPHIuLSjFJCcgtcA5s8jW/mDkbEisasLE/jxTrJnprKMa8TqrZ7d0t4eU5zx3tqNg+a7j1P45sIPlMNlADbEj6uk+xXn3rORVeenVPf6+pvY4jgJfHY30Rv3CeK4Mqj3iXV8ml5THD/EPde7bFbjqaExwiuSngcWMUfqrZ1y74KqlwpPM+/jOAOWJZwv06yr27Omc82Dd/bArsSfgCFTfzfafwN82ztZ75xeJ5XV39eg/ZQbbt59iFf9Vw7t77n8upzB/pQvS8UUA3EkUlYm0BDB8cxGueaqmO4pYSj3jbbjvNtsi7Zb8vvJXwyx7cmtzYd192ZpP4JEMFDvU7n2DcHlWdh6ptnh3hPVlomHnbgLI5aejctJ0eY+tuZSlPpY/Bb/8g3fuhv8t4z3J6z10Mz05V5ps8zSthfyTTNKkv4YOot3GVUnsbv7Y8+Jra2a3vnwIA2D7m9B69mRl6x+Gjr676rhGdTbnWNukd5TuovgtD2idqSZeq9nEO6rmUGwC8AJbxp2p/0rWtsbe1tj+vnnLLdfXLv1G39v9FAKcEwfw96AHavk+zd3PGIWPp7kARjnWRPJdwfsewTmYT+cC6hGfIrvMikNFBKaHpv4otMTUtvEZEOfwHjYXBpcLagcQAAAABJRU5ErkJggg==">
+    <div class="qtext">${esc(snap.card.q)}</div>
+  </div></div>`;
+}
+function optsHtml(){
+  return snap.card.opts.map((o,i)=>`
+    <button class="opt ${pendingChoice===i?'sel':''}" onclick="UI.pick(${i})">
+      <span class="letter">${LETTERS[i]}</span><span>${esc(o)}</span>
+    </button>`).join("");
+}
+function answerScreen(){
+  const mill = snap.players[snap.millIdx];
+  if(myIdx===snap.millIdx && !mill.eliminated){
+    $( brand(true) + scoreboard() + `
+    <div class="panel">
+      <div class="role-line">You are the Millionaire.</div>
+      <div class="read-aloud">🗣 Read Aloud &nbsp;•&nbsp; Then Choose Secretly</div>
+      ${cardHtml()}
+      ${optsHtml()}
+      <button class="btn-gold btn-lock" ${pendingChoice==null?"disabled":""} onclick="UI.lockAnswer()">🔒 Lock In My Secret Answer</button>
+      ${bannerHtml()}
+    </div>`);
+  } else {
+    $( brand(true) + scoreboard() + `
+    <div class="panel">
+      <div class="role-line">${esc(mill.name)} is the Millionaire.</div>
+      <div class="read-aloud">🗣 Listen As The Card Is Read Aloud</div>
+      ${cardHtml()}
+      <div class="waiting"><p class="muted dots">Listen as the Millionaire reads the card aloud — waiting for the secret answer</p></div>
+      ${bannerHtml()}
+    </div>`);
+  }
+}
+function bettingScreen(){
+  const mill = snap.players[snap.millIdx];
+  const iAmBettor = myIdx!==snap.millIdx && !snap.players[myIdx].eliminated;
+  const iBet = !!snap.betDone[myIdx] || lockedThisPhase;
+  const pills = snap.players.map((p,i)=>{
+    if(i===snap.millIdx || p.eliminated) return "";
+    return `<span class="lock-pill ${snap.betDone[i]?'done':''}">${esc(p.name)} ${snap.betDone[i]?'✓ bet placed':'…'}</span>`;
+  }).join("");
+  if(iAmBettor && !iBet){
+    const maxB = Math.min(3, snap.players[myIdx].balance);
+    const chips=[1,2,3].map(v=>`<button class="bet-chip ${pendingBet===v?'sel':''}" ${v>maxB?"disabled":""} onclick="UI.pickBet(${v})">${M(v)}</button>`).join("");
+    $( brand(true) + scoreboard() + `
+    <div class="panel">
+      <div class="role-line">How did ${esc(mill.name)} answer?</div>
+      <div class="read-aloud">💰 Choose Secretly &nbsp;•&nbsp; Then Place Your Bet</div>
+      ${cardHtml()}
+      ${optsHtml()}
+      <div class="section-label">Your bet</div>
+      <div class="bets">${chips}</div>
+      <button class="btn-gold btn-lock" ${(pendingChoice==null||pendingBet==null)?"disabled":""} onclick="UI.lockBet()">🔒 Lock In My Bet</button>
+      ${bannerHtml()}
+    </div>`);
+  } else {
+    $( brand(true) + scoreboard() + `
+    <div class="panel">
+      ${cardHtml()}
+      <div class="waiting"><p class="muted dots">${myIdx===snap.millIdx ? "Your answer is locked — waiting for the bets" : "Bet locked — waiting for the other players"}</p></div>
+      <div class="lock-list">${pills}</div>
+      ${bannerHtml()}
+    </div>`);
+  }
+}
+function revealScreen(){
+  const r = snap.reveal;
+  const mill = snap.players[r.millIdx];
+  const rows = r.results.map(x=>`
+    <div class="result-row">
+      <span>${esc(x.name)} — bet ${M(x.bet)} on <b>${LETTERS[x.choice]}</b></span>
+      <span class="${x.won?'win':'lose'}">${x.won?'+':'−'}${M(x.bet)}${x.out?' • OUT':''}</span>
+    </div>`).join("");
+  $( brand(true) + scoreboard() + `
+  <div class="panel">
+    <div class="qcard"><div class="qtext" style="font-size:.98rem">${esc(snap.card.q)}</div></div>
+    <div class="reveal-answer">
+      <p class="muted">${esc(mill.name)}'s honest answer:</p>
+      <div class="big">${LETTERS[r.answer]} — ${esc(snap.card.opts[r.answer])}</div>
+    </div>
+    ${rows}
+    ${role==="host" ? `<button class="btn-gold" onclick="UI.next()">Next Card →</button>`
+                    : `<div class="waiting"><p class="muted dots">Waiting for the host to continue</p></div>`}
+    ${bannerHtml()}
+  </div>`);
+}
+function endScreen(){
+  const stand = snap.players.slice().sort((a,b)=>b.balance-a.balance).map((p,i)=>`
+    <div class="standing"><span>${i+1}. ${esc(p.name)} ${p.eliminated?'(eliminated)':''}</span><b style="color:var(--gold)">${M(p.balance)}</b></div>`).join("");
+  const top = Math.max(...snap.players.map(p=>p.balance));
+  const names = snap.winners.map(esc).join(" & ");
+  const drops = [5,15,26,37,48,59,70,81,92,33,64,10].map((x,i)=>
+    `<span class="drop" style="left:${x}%; animation-delay:${(i*0.7).toFixed(1)}s; animation-duration:${4+(i%5)}s">${i%3===0?"💰":"💵"}</span>`).join("");
+  $( brand(false) + `
+  <div class="panel">
+    <div class="winner-box">
+      <div class="rain">${drops}</div>
+      <div class="trophy">🏆</div>
+      <p class="muted">${snap.winners.length>1?'Winners':'Winner'}</p>
+      <div class="prize-cert">
+        <div class="pc-head">★ Grand Prize ★</div>
+        <div class="pc-title">The Millionaire's Cup</div>
+        <div class="pc-sub">awarded to</div>
+        <div class="pc-name">${names}</div>
+        <div class="pc-sub">Certified Multi-Millionaire — final fortune of ${M(top)}</div>
+      </div>
+    </div>
+    <div style="margin-top:16px; text-align:left">${stand}</div>
+    <p class="muted" style="margin-top:18px; text-align:center;">Thank you for playing our prototype game. Please help us make it even better by filling out this brief Evaluation Form.</p>
+    <button class="btn-gold" onclick="location.href='yjbam-evaluation.html'">Evaluation Form →</button>
+    <button class="btn-ghost" onclick="location.reload()">Leave Game</button>
+  </div>`);
+}
+
+/* ---------- NETWORKING ---------- */
+function makeCode(){ let c=""; for(let i=0;i<4;i++) c+=CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)]; return c; }
+function peerId(code){ return "yjbam-room-"+code.toLowerCase(); }
+
+/* STUN + TURN relay fallback for devices on cellular or strict networks */
+const PEER_OPTS = {config:{iceServers:[
+  {urls:"stun:stun.cloudflare.com:3478"},
+  {urls:"turn:openrelay.metered.ca:80", username:"openrelayproject", credential:"openrelayproject"},
+  {urls:"turn:openrelay.metered.ca:443", username:"openrelayproject", credential:"openrelayproject"}
+]}};
+
+/* Keep the screen awake so the host doesn't silently drop off when a phone locks */
+let wakeLock=null;
+async function keepAwake(){
+  try{ if(navigator.wakeLock) wakeLock = await navigator.wakeLock.request("screen"); }catch(e){}
+}
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible") keepAwake(); });
+
+function broadcast(){
+  snap = HostGame.snapshot(G);
+  const msg = {t:"state", snap};
+  conns.forEach(c=>{ if(c.open) c.send(msg); });
+  lockedThisPhaseReset();
+  render();
+}
+let lastPhase=null;
+function lockedThisPhaseReset(){
+  if(snap.phase!==lastPhase){ pendingChoice=null; pendingBet=null; lockedThisPhase=false; lastPhase=snap.phase; }
+}
+
+function startHost(){
+  role="host"; roomCode=makeCode();
+  banner="";
+  keepAwake();
+  peer = new Peer(peerId(roomCode), PEER_OPTS);
+  peer.on("open", ()=>{
+    G = HostGame.create(myName);
+    myIdx = 0;
+    broadcast();
+  });
+  peer.on("disconnected", ()=>{ try{ peer.reconnect(); }catch(e){} });
+  peer.on("error", e=>{
+    if(String(e.type)==="unavailable-id"){ startHost(); return; } // rare code collision → retry
+    banner="Connection error: "+e.type+". Check your internet connection."; render();
+  });
+  peer.on("connection", conn=>{
+    conn.on("data", d=>handleClientMsg(conn, d));
+    conn.on("close", ()=>{
+      if(conn._pIdx!=null && G){ G.players[conn._pIdx].connected=false; broadcast(); }
+      conns = conns.filter(c=>c!==conn);
+    });
+  });
+}
+function handleClientMsg(conn, d){
+  if(!G || typeof d!=="object") return;
+  if(d.t==="join"){
+    const idx = HostGame.addPlayer(G, d.name);
+    if(idx<0){ conn.send({t:"reject", reason: G.phase!=="lobby" ? "Game already started." : "Room is full ("+MAX_PLAYERS+" players max)."}); return; }
+    conn._pIdx = idx;
+    conns.push(conn);
+    conn.send({t:"welcome", idx, code:roomCode});
+    broadcast();
+  }
+  else if(d.t==="answer"){ if(HostGame.handleAnswer(G, conn._pIdx, d.choice)) broadcast(); }
+  else if(d.t==="bet"){ if(HostGame.handleBet(G, conn._pIdx, d.choice, d.bet)) broadcast(); }
+}
+
+function startJoin(code){
+  role="client"; roomCode=code; banner="";
+  keepAwake();
+  peer = new Peer(PEER_OPTS);
+  peer.on("disconnected", ()=>{ try{ peer.reconnect(); }catch(e){} });
+  peer.on("open", ()=>{
+    hostConn = peer.connect(peerId(code), {reliable:true});
+    let joined=false;
+    hostConn.on("open", ()=>{ hostConn.send({t:"join", name:myName}); });
+    hostConn.on("data", d=>{
+      if(d.t==="welcome"){ joined=true; myIdx=d.idx; }
+      else if(d.t==="reject"){ banner=d.reason; snap=null; landing(); hostConn.close(); }
+      else if(d.t==="state"){ snap=d.snap; lockedThisPhaseReset(); render(); }
+    });
+    hostConn.on("close", ()=>{ banner="Lost connection to the host."; render(); });
+    setTimeout(()=>{ if(!joined && !banner){ banner="Could not reach room "+code+". Make sure the host's screen is ON with the game page open, then try again."; snap=null; landing(); } }, 10000);
+  });
+  peer.on("error", e=>{
+    banner = (String(e.type)==="peer-unavailable")
+      ? "Room "+code+" not found. Double-check the code — and if the host's screen went to sleep, the room closed: the host should tap 'Host a New Game' for a fresh code."
+      : "Connection error: "+e.type;
+    snap=null; landing();
+  });
+}
+
+/* ---------- CONTROLLER ---------- */
+window.UI = {
+  toLanding(){ landing(); },
+  host(){
+    myName = (document.getElementById("nm").value.trim() || "Host").slice(0,14);
+    startHost();
+    $(brand(false)+`<div class="panel waiting"><p class="muted dots">Creating your room</p></div>`);
+  },
+  join(){
+    myName = (document.getElementById("nm").value.trim() || "Player").slice(0,14);
+    const code = document.getElementById("code").value.trim().toUpperCase();
+    if(code.length!==4){ banner="Enter the 4-character room code."; landing(); return; }
+    startJoin(code);
+    $(brand(false)+`<div class="panel waiting"><p class="muted dots">Joining room ${esc(code)}</p></div>`);
+  },
+  start(){ if(role==="host" && HostGame.start(G)) broadcast(); },
+  pick(i){ pendingChoice=i; render(); },
+  pickBet(v){ pendingBet=v; render(); },
+  lockAnswer(){
+    if(role==="host"){ if(HostGame.handleAnswer(G, myIdx, pendingChoice)) broadcast(); }
+    else { hostConn.send({t:"answer", choice:pendingChoice}); lockedThisPhase=true; render(); }
+  },
+  lockBet(){
+    if(role==="host"){ if(HostGame.handleBet(G, myIdx, pendingChoice, pendingBet)) broadcast(); }
+    else { hostConn.send({t:"bet", choice:pendingChoice, bet:pendingBet}); lockedThisPhase=true; render(); }
+  },
+  next(){ if(role==="host" && HostGame.next(G)) broadcast(); },
+  playAgain(){
+    if(role!=="host") return;
+    G.players.forEach(p=>{ p.balance=START_BALANCE; p.eliminated=false; });
+    G.phase="lobby"; G.winners=null; G.lastResults=null;
+    broadcast();
+  }
+};
+/* ---------- DEMO DRIVER (replaces live game startup) ---------- */
+const NAMES = ["Michael","Barbara","Pat","Chris"];
+function P(bals, elim){
+  return NAMES.map((n,i)=>({name:n, balance:bals[i], eliminated:!!(elim&&elim[i]), connected:true}));
+}
+const S = 20; // starting balance
+/* one snapshot factory */
+function mk(o){
+  return Object.assign({
+    phase:"answer", players:P([S,S,S,S]), millIdx:0, cardIdx:0, totalCards:20,
+    card:CARDS[0], answered:false, betDone:{}, reveal:null, winners:null
+  }, o);
+}
+/* render one player's real screen and return its HTML */
+function screenFor(idx, isHost, snapshot, choice, betAmt){
+  role = isHost ? "host" : "client";
+  myIdx = idx; snap = snapshot;
+  pendingChoice = (choice===undefined?null:choice);
+  pendingBet    = (betAmt===undefined?null:betAmt);
+  lockedThisPhase = false;
+  render();
+  return app.innerHTML;
+}
+
+const C1 = CARDS[0];   // Card 1 — the opener
+const C2 = CARDS[1];   // Card 2 — next turn
+
+/* Turn 1: Michael answers B. Barbara guesses C ($2M, wrong). Pat guesses B ($3M, right). Chris guesses D ($1M, wrong). */
+const AFTER = [S, S-2, S+3, S-1];   // 20, 18, 23, 19
+const REVEAL1 = {answer:1, millIdx:0, cardIdx:0, results:[
+  {idx:1, name:"Barbara", choice:2, bet:2, won:false, balance:18, out:false},
+  {idx:2, name:"Pat",     choice:1, bet:3, won:true,  balance:23, out:false},
+  {idx:3, name:"Chris",   choice:3, bet:1, won:false, balance:19, out:false}
+]};
+
+const BEATS = [
+ { cap:"Four players. Four phones. One room code.",
+   sub:"No app store, no downloads — everyone opens the same web address.",
+   labA:"Michael — hosting", labB:"Barbara — joining", active:"both",
+   A:()=>{ roomCode="KQ7M"; return screenFor(0,true,  mk({phase:"lobby"})); },
+   B:()=>{ roomCode="KQ7M"; return screenFor(1,false, mk({phase:"lobby"})); } },
+
+ { cap:"Michael is the Millionaire. He reads the card aloud.",
+   sub:"Everyone hears the same question — a quote, a situation, four answers.",
+   labA:"Michael — the Millionaire", labB:"Barbara — listening", active:"A",
+   A:()=>screenFor(0,true,  mk({card:C1})),
+   B:()=>screenFor(1,false, mk({card:C1})) },
+
+ { cap:"Only Michael can answer. Barbara sees the card — but no buttons.",
+   sub:"This is the split a printed card game can't do.",
+   labA:"Michael — choosing", labB:"Barbara — no choice offered", active:"A",
+   A:()=>screenFor(0,true,  mk({card:C1}), 1),
+   B:()=>screenFor(1,false, mk({card:C1})) },
+
+ { cap:"He locks in the answer that's honestly his.",
+   sub:"Now that you're rich, you can afford to be honest.",
+   labA:"Michael — locked in", labB:"Barbara — her turn to guess", active:"B",
+   A:()=>screenFor(0,true,  mk({card:C1, phase:"betting", answered:true})),
+   B:()=>screenFor(1,false, mk({card:C1, phase:"betting", answered:true})) },
+
+ { cap:"Barbara has to guess what Michael chose — and back it with money.",
+   sub:"$1M, $2M or $3M. The bigger the certainty, the bigger the bet.",
+   labA:"Michael — waiting", labB:"Barbara — betting", active:"B",
+   A:()=>screenFor(0,true,  mk({card:C1, phase:"betting", answered:true})),
+   B:()=>screenFor(1,false, mk({card:C1, phase:"betting", answered:true}), 2, 2) },
+
+ { cap:"Every player bets at the same time, in private.",
+   sub:"Nobody can be influenced by anyone else's guess.",
+   labA:"Michael — watching bets arrive", labB:"Barbara — bet locked", active:"both",
+   A:()=>screenFor(0,true,  mk({card:C1, phase:"betting", answered:true, betDone:{1:true,2:true}})),
+   B:()=>screenFor(1,false, mk({card:C1, phase:"betting", answered:true, betDone:{1:true,2:true,3:true}})) },
+
+ { cap:"The reveal.",
+   sub:"This is the moment the room leans in — and starts arguing.",
+   labA:"Michael — the answer", labB:"Barbara — the damage", active:"both",
+   A:()=>screenFor(0,true,  mk({card:C1, phase:"reveal", players:P(AFTER), reveal:REVEAL1})),
+   B:()=>screenFor(1,false, mk({card:C1, phase:"reveal", players:P(AFTER), reveal:REVEAL1})) },
+
+ { cap:"Pat read him correctly and takes $3M. Barbara guessed wrong and pays $2M.",
+   sub:"You don't win by knowing yourself. You win by knowing the people you love.",
+   labA:"Michael — the answer", labB:"Barbara — the damage", active:"both",
+   A:()=>screenFor(0,true,  mk({card:C1, phase:"reveal", players:P(AFTER), reveal:REVEAL1})),
+   B:()=>screenFor(1,false, mk({card:C1, phase:"reveal", players:P(AFTER), reveal:REVEAL1})) },
+
+ { cap:"The crown passes. Now Barbara is the Millionaire — and Michael guesses.",
+   sub:"Watch the two screens swap roles.",
+   labA:"Michael — now guessing", labB:"Barbara — now the Millionaire", active:"both",
+   A:()=>screenFor(0,true,  mk({card:C2, cardIdx:1, millIdx:1, players:P(AFTER)})),
+   B:()=>screenFor(1,false, mk({card:C2, cardIdx:1, millIdx:1, players:P(AFTER)}), 0) },
+
+ { cap:"Twenty cards. Five turns each. About thirty minutes.",
+   sub:"Play-tested length, confirmed by our first evaluations.",
+   labA:"Michael — now guessing", labB:"Barbara — now the Millionaire", active:"both",
+   A:()=>screenFor(0,true,  mk({card:C2, cardIdx:1, millIdx:1, players:P([20,18,23,19])})),
+   B:()=>screenFor(1,false, mk({card:C2, cardIdx:1, millIdx:1, players:P([20,18,23,19])}), 0) },
+
+ { cap:"One winner. One Millionaire's Cup.",
+   sub:"Barbara came back from the worst start at the table.",
+   labA:"Michael", labB:"Barbara — the winner", active:"both",
+   A:()=>screenFor(0,true,  mk({phase:"end", card:null, players:P([27,34,24,15]), winners:["Barbara"]})),
+   B:()=>screenFor(1,false, mk({phase:"end", card:null, players:P([27,34,24,15]), winners:["Barbara"]})) },
+
+ { cap:"You Just Became a MILLIONAIRE®",
+   sub:"Over 800,000 copies sold in print. Now on every phone at the table.",
+   labA:"", labB:"", active:"none",
+   A:()=>screenFor(0,true,  mk({phase:"end", card:null, players:P([27,34,24,15]), winners:["Barbara"]})),
+   B:()=>screenFor(1,false, mk({phase:"end", card:null, players:P([27,34,24,15]), winners:["Barbara"]})) }
+];
+
+const BEAT_MS = 7000;
+let cur = -1, timer = null, playing = true;
+const $id = id => document.getElementById(id);
+
+function paint(i){
+  const b = BEATS[i];
+  $id("stepNum").textContent = "Step " + (i+1) + " of " + BEATS.length;
+  $id("capText").textContent = b.cap;
+  $id("capSub").textContent  = b.sub || "";
+  $id("labA").textContent = b.labA || "";
+  $id("labB").textContent = b.labB || "";
+  $id("scrA").innerHTML = b.A();
+  $id("scrB").innerHTML = b.B();
+  $id("phA").classList.toggle("active", b.active==="A" || b.active==="both");
+  $id("phB").classList.toggle("active", b.active==="B" || b.active==="both");
+  Array.from($id("dots").children).forEach((d,k)=>{
+    d.className = "dot" + (k===i ? " on" : (k<i ? " seen" : ""));
+  });
+  cur = i;
+}
+function schedule(){
+  clearTimeout(timer);
+  if(!playing) return;
+  timer = setTimeout(()=>{
+    if(cur < BEATS.length-1) paint(cur+1), schedule();
+    else { playing=false; syncBtn(); }
+  }, BEAT_MS);
+}
+function syncBtn(){
+  $id("playBtn").innerHTML = playing ? "▍▍&nbsp; Pause" : "▶&nbsp; Play";
+}
+window.DEMO = {
+  next(){ playing=false; syncBtn(); clearTimeout(timer); if(cur<BEATS.length-1) paint(cur+1); },
+  prev(){ playing=false; syncBtn(); clearTimeout(timer); if(cur>0) paint(cur-1); },
+  go(i){ playing=false; syncBtn(); clearTimeout(timer); paint(i); },
+  toggle(){ playing=!playing; syncBtn(); if(playing){ if(cur>=BEATS.length-1) paint(0); schedule(); } else clearTimeout(timer); },
+  restart(){ clearTimeout(timer); playing=true; syncBtn(); paint(0); schedule(); }
+};
+/* build dots, start */
+BEATS.forEach((b,i)=>{
+  const d=document.createElement("div"); d.className="dot";
+  d.onclick=()=>DEMO.go(i); d.title=b.cap;
+  $id("dots").appendChild(d);
+});
+document.addEventListener("keydown", e=>{
+  if(e.key==="ArrowRight") DEMO.next();
+  else if(e.key==="ArrowLeft") DEMO.prev();
+  else if(e.key===" "){ e.preventDefault(); DEMO.toggle(); }
+});
+paint(0); syncBtn(); schedule();
+})();
+</script>
+</body>
+</html>
