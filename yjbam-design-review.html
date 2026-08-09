@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>You Just Became a MILLIONAIRE® — Design Review (all screens)</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -20,13 +20,28 @@
     --ink:#0A1A2F;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
+  html{height:100%; background:#081E3B;}
   body{
     background:#081E3B;
-    min-height:100vh; color:var(--cream);
+    min-height:100vh;              /* fallback for older browsers */
+    min-height:100dvh;             /* true visible height — excludes browser chrome */
+    color:var(--cream);
     font-family:"Trebuchet MS", "Segoe UI", Helvetica, Arial, sans-serif;
     display:flex; flex-direction:column; align-items:center;
+    /* --- app-like behaviour --- */
+    overscroll-behavior:none;                 /* no rubber-band bounce past the top */
+    -webkit-touch-callout:none;               /* no long-press copy/share menu */
+    -webkit-user-select:none; user-select:none;
+    -webkit-tap-highlight-color:transparent;  /* no grey flash on tap */
+    touch-action:manipulation;                /* kills double-tap zoom, keeps pinch zoom */
   }
-  #app{width:100%; max-width:560px; padding:16px 16px 50px; flex:1;}
+  /* text still selectable where it must be */
+  input, textarea{-webkit-user-select:text; user-select:text; -webkit-touch-callout:default;}
+  #app{
+    width:100%; max-width:560px; flex:1;
+    padding:calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right))
+            calc(50px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
+  }
   .brand{text-align:center; margin:14px 0 4px;}
   .brand .script{font-family:"Snell Roundhand","Brush Script MT","Segoe Script",cursive; font-size:1.55rem; color:#f7ecc4;}
   .brand .title{font-family:Georgia,"Times New Roman",serif; letter-spacing:.12em; font-size:2.3rem; font-weight:400;
@@ -54,6 +69,11 @@
   .chip.me{box-shadow:0 0 0 1.5px var(--cream);}
   .chip.gone{opacity:.4; font-style:italic;}
   .chip b{color:var(--gold);}
+  .roomline{text-align:center; font-size:.76rem; letter-spacing:.06em; color:rgba(236,224,184,.6); margin-top:9px;}
+  .roomline b{color:var(--gold); letter-spacing:.22em; font-size:.9rem;}
+  .droppedline{text-align:center; font-size:.76rem; color:var(--orange); margin-top:7px; line-height:1.45;
+    border:1px solid rgba(245,166,35,.4); background:rgba(245,166,35,.1); border-radius:9px; padding:7px 10px;}
+  .opt.static{opacity:.9; cursor:default;}
   .progress{text-align:center; font-size:.78rem; color:rgba(236,224,184,.6); margin-top:8px; letter-spacing:.08em;}
   .qcard{background:var(--cream-panel); color:var(--ink); border-radius:14px; padding:9px; margin:12px auto 0; width:91.5%; box-shadow:0 8px 24px rgba(0,0,0,.45);}
   .qframe{border:1px solid var(--gold2); border-radius:9px; padding:16px 14px; box-shadow:0 0 0 2px rgba(224,176,30,.18);}
@@ -97,7 +117,8 @@
   .banner{background:rgba(255,107,107,.12); border:1px solid var(--red); color:var(--red); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:.88rem; text-align:center;}
   .lobby-player{display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; background:rgba(255,255,255,.05); margin-top:8px;}
   .lobby-player .dot{width:9px; height:9px; border-radius:50%; background:var(--green);}
-  footer{font-size:.7rem; color:rgba(236,224,184,.45); text-align:center; padding:12px;}
+  footer{font-size:.7rem; color:rgba(236,224,184,.45); text-align:center;
+    padding:12px 12px calc(12px + env(safe-area-inset-bottom));}
   #gallery{width:100%;}
   .gallery-intro{max-width:560px; margin:26px auto 0; text-align:center; padding:0 14px;}
   .gallery-intro h1{font-family:"Trebuchet MS",sans-serif; font-weight:700; color:var(--gold-soft); font-size:1.5rem; letter-spacing:.03em;}
@@ -213,6 +234,24 @@ const HostGame = {
     g.phase = "betting";
     return true;
   },
+  /* A disconnected player who never returns must not stall the round. */
+  forceOut(g, idx){
+    if(g.phase!=="betting") return false;
+    const p = g.players[idx];
+    if(!p || p.eliminated || idx===g.millIdx) return false;
+    p.eliminated = true;
+    delete g.turn.bets[idx];
+    if(Object.keys(g.turn.bets).length === this.bettorIdxs(g).length) this._settle(g);
+    return true;
+  },
+  /* Restore a dropped player to their original seat, mid-game. */
+  rejoin(g, name){
+    const nm = (name||"").trim().slice(0,14);
+    const i = g.players.findIndex(p => p.name === nm && !p.connected);
+    if(i < 0) return -1;
+    g.players[i].connected = true;
+    return i;
+  },
   handleBet(g, idx, choice, bet){
     if(g.phase!=="betting") return false;
     if(!this.bettorIdxs(g).includes(idx)) return false;
@@ -278,7 +317,16 @@ if(typeof module!=="undefined") module.exports = {CARDS, GameLogic, HostGame, ST
 (function(){
 if(typeof document==="undefined") return;
 const app = document.getElementById("app");
-const $ = h => { app.innerHTML = h; window.scrollTo(0,0); };
+let lastScreenKey = null;
+const $ = h => {
+  const y = window.scrollY;
+  app.innerHTML = h;
+  /* Only jump to the top on a genuinely new screen. Selecting an option
+     re-renders the same screen, and must not throw the page back to the top. */
+  const key = snap ? snap.phase+"|"+snap.cardIdx+"|"+snap.millIdx : "start";
+  if(key === lastScreenKey){ window.scrollTo(0, y); }
+  else { lastScreenKey = key; window.scrollTo(0, 0); }
+};
 const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 const M = v => "$"+v+"M";
 const LETTERS = ["A","B","C","D"];
@@ -311,7 +359,12 @@ function scoreboard(){
     const crown = (i===snap.millIdx && !p.eliminated && snap.phase!=="lobby" && snap.phase!=="end") ? "👑 " : "";
     return `<span class="${cls}">${crown}${esc(p.name)}${i===myIdx?" (you)":""} <b>${M(p.balance)}</b></span>`;
   }).join("");
-  return `<div id="scoreboard">${chips}</div>`;
+  const dropped = snap.players.filter(p=>!p.connected && !p.eliminated).map(p=>p.name);
+  const codeLine = roomCode
+    ? `<div class="roomline">Room code <b>${esc(roomCode)}</b></div>` : "";
+  const dropLine = dropped.length
+    ? `<div class="droppedline">${esc(dropped.join(" & "))} lost connection &mdash; rejoin with the same name and this code. The game waits.</div>` : "";
+  return `<div id="scoreboard">${chips}</div>${codeLine}${dropLine}`;
 }
 function bannerHtml(){ return banner ? `<div class="banner">${esc(banner)}</div>` : ""; }
 
@@ -350,7 +403,7 @@ function landing(){
     <input type="text" id="nm" maxlength="14" placeholder="Your name" value="${esc(myName)}">
     <button class="btn-gold" onclick="UI.host()">Host a New Game</button>
     <div class="section-label">— or —</div>
-    <input type="text" id="code" maxlength="4" placeholder="Room code (e.g. KQ7M)" style="text-transform:uppercase; text-align:center; letter-spacing:.3em">
+    <input type="text" id="code" maxlength="4" placeholder="Room code (e.g. KQ7M)" value="${esc(roomCode)}" style="text-transform:uppercase; text-align:center; letter-spacing:.3em">
     <button class="btn-ghost" onclick="UI.join()">Join a Game</button>
     ${bannerHtml()}
   </div>`);
@@ -398,6 +451,12 @@ function optsHtml(){
       <span class="letter">${LETTERS[i]}</span><span>${esc(o)}</span>
     </button>`).join("");
 }
+function optsStaticHtml(){
+  return snap.card.opts.map((o,i)=>`
+    <div class="opt static">
+      <span class="letter">${LETTERS[i]}</span><span>${esc(o)}</span>
+    </div>`).join("");
+}
 function answerScreen(){
   const mill = snap.players[snap.millIdx];
   if(myIdx===snap.millIdx && !mill.eliminated){
@@ -416,7 +475,8 @@ function answerScreen(){
       <div class="role-line">${esc(mill.name)} is the Millionaire.</div>
       <div class="read-aloud">🗣 Listen As The Card Is Read Aloud</div>
       ${cardHtml()}
-      <div class="waiting"><p class="muted dots">Listen as the Millionaire reads the card aloud — waiting for the secret answer</p></div>
+      ${optsStaticHtml()}
+      <div class="waiting"><p class="muted dots">Follow along as the Millionaire reads the card aloud — waiting for the secret answer</p></div>
       ${bannerHtml()}
     </div>`);
   }
@@ -444,11 +504,18 @@ function bettingScreen(){
       ${bannerHtml()}
     </div>`);
   } else {
+    const stuck = (role==="host")
+      ? snap.players.map((p,i)=>({p,i}))
+          .filter(x => x.i!==snap.millIdx && !x.p.eliminated && !x.p.connected && !snap.betDone[x.i])
+          .map(x => `<button class="btn-ghost" onclick="UI.forceOut(${x.i})">Continue without ${esc(x.p.name)}</button>`)
+          .join("")
+      : "";
     $( brand(true) + scoreboard() + `
     <div class="panel">
       ${cardHtml()}
       <div class="waiting"><p class="muted dots">${myIdx===snap.millIdx ? "Your answer is locked — waiting for the bets" : "Bet locked — waiting for the other players"}</p></div>
       <div class="lock-list">${pills}</div>
+      ${stuck}
       ${bannerHtml()}
     </div>`);
   }
@@ -558,8 +625,17 @@ function startHost(){
 function handleClientMsg(conn, d){
   if(!G || typeof d!=="object") return;
   if(d.t==="join"){
+    /* Mid-game reconnection: same name, seat still held. */
+    const back = HostGame.rejoin(G, d.name);
+    if(back >= 0){
+      conn._pIdx = back; conns.push(conn);
+      conn.send({t:"welcome", idx:back, code:roomCode});
+      broadcast(); return;
+    }
     const idx = HostGame.addPlayer(G, d.name);
-    if(idx<0){ conn.send({t:"reject", reason: G.phase!=="lobby" ? "Game already started." : "Room is full ("+MAX_PLAYERS+" players max)."}); return; }
+    if(idx<0){ conn.send({t:"reject", reason: G.phase!=="lobby"
+        ? "That game is already under way. To return to a seat you lost, enter the same name you used before."
+        : "Room is full ("+MAX_PLAYERS+" players max)."}); return; }
     conn._pIdx = idx;
     conns.push(conn);
     conn.send({t:"welcome", idx, code:roomCode});
@@ -583,7 +659,10 @@ function startJoin(code){
       else if(d.t==="reject"){ banner=d.reason; snap=null; landing(); hostConn.close(); }
       else if(d.t==="state"){ snap=d.snap; lockedThisPhaseReset(); render(); }
     });
-    hostConn.on("close", ()=>{ banner="Lost connection to the host."; render(); });
+    hostConn.on("close", ()=>{
+      banner = "Connection lost. Tap Join a Game — your name and the room code are already filled in, and your money is waiting.";
+      snap = null; landing();
+    });
     setTimeout(()=>{ if(!joined && !banner){ banner="Could not reach room "+code+". Make sure the host's screen is ON with the game page open, then try again."; snap=null; landing(); } }, 10000);
   });
   peer.on("error", e=>{
@@ -621,20 +700,16 @@ window.UI = {
     else { hostConn.send({t:"bet", choice:pendingChoice, bet:pendingBet}); lockedThisPhase=true; render(); }
   },
   next(){ if(role==="host" && HostGame.next(G)) broadcast(); },
-  playAgain(){
-    if(role!=="host") return;
-    G.players.forEach(p=>{ p.balance=START_BALANCE; p.eliminated=false; });
-    G.phase="lobby"; G.winners=null; G.lastResults=null;
-    broadcast();
-  }
+  forceOut(i){ if(role==="host" && HostGame.forceOut(G, i)) broadcast(); }
 };
-/* ---------- DESIGN REVIEW GALLERY (replaces live game startup) ---------- */
+/* ---------- DESIGN REVIEW GALLERY ---------- */
 const gallery = document.getElementById("gallery");
 gallery.innerHTML = `<div class="gallery-intro">
   <h1>Design Review — every screen of the game</h1>
-  <p>Updated 7/31: deck resequenced so the 20 strongest cards are Cards 1–20, with Mae West
-  pinned as the closer; 5 rounds per player; 3–4 players (15 or 20 cards, ~30–40 min);
-  new How to Play text. Note further requests by screen number.</p>
+  <p>Updated 8/2 from the first 10 evaluations: every player now sees the answer choices while the
+  Millionaire is deciding; the room code stays on screen throughout; a dropped player can rejoin
+  mid-game; tapping an option no longer jumps the page; Play Again removed.
+  Note requests by screen number.</p>
 </div>`;
 function shot(num, title, note, setup){
   banner=""; pendingChoice=null; pendingBet=null;
@@ -650,32 +725,38 @@ const P4=[
   {name:"Pat", balance:18, eliminated:false, connected:true},
   {name:"Chris", balance:20, eliminated:false, connected:true}
 ];
+const PDROP=[
+  {name:"Michael", balance:23, eliminated:false, connected:true},
+  {name:"Barbara", balance:19, eliminated:false, connected:false},
+  {name:"Pat", balance:18, eliminated:false, connected:true},
+  {name:"Chris", balance:20, eliminated:false, connected:true}
+];
 const baseSnap={phase:"lobby", players:P4, millIdx:0, cardIdx:0, totalCards:20, card:CARDS[0], answered:false, betDone:{}, reveal:null, winners:null};
 
-shot(1,"Introduction page","new How to Play text, 5 rounds, 3–4 players",()=>{ role=null; snap=null; myIdx=0; introScreen(); });
-shot(2,"Welcome page","host or join",()=>{ role=null; snap=null; myIdx=0; landing(); });
-shot(3,"Lobby — host's view","room code and player list (4 players)",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap}; render(); });
-shot(4,"Card 1 — the opener","option B selected",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"answer"}; pendingChoice=1; render(); });
-shot(5,"Waiting for the Millionaire","what everyone else sees meanwhile",()=>{ role="client"; myIdx=1; snap={...baseSnap, phase:"answer"}; render(); });
-shot(6,"Betting screen","guess + bet (option B and $2M selected)",()=>{ role="client"; myIdx=1; snap={...baseSnap, phase:"betting", answered:true}; pendingChoice=1; pendingBet=2; render(); });
+shot(1,"Introduction page","How to Play, 5 rounds, 3–4 players",()=>{ role=null; snap=null; myIdx=0; introScreen(); });
+shot(2,"Welcome page","room code now pre-filled if you were dropped",()=>{ role=null; snap=null; myIdx=0; roomCode=""; landing(); });
+shot(3,"Lobby — host's view","room code and player list",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap}; render(); });
+shot(4,"The Millionaire's card","NEW: room code now sits under the scoreboard",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"answer"}; pendingChoice=1; render(); });
+shot(5,"A player while the Millionaire decides","NEW: the four choices are now visible to everyone",()=>{ role="client"; roomCode="KQ7M"; myIdx=1; snap={...baseSnap, phase:"answer"}; render(); });
+shot(6,"Betting screen","guess + bet (option B and $2M selected)",()=>{ role="client"; roomCode="KQ7M"; myIdx=1; snap={...baseSnap, phase:"betting", answered:true}; pendingChoice=1; pendingBet=2; render(); });
 shot(7,"Waiting for bets","the Millionaire watches bets lock in",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"betting", answered:true, betDone:{1:true,2:true}}; render(); });
-shot(8,"The reveal","answer shown, wins and losses settled",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"reveal",
+shot(8,"NEW — a player has dropped out","host sees the warning and can continue without them",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, players:PDROP, phase:"betting", answered:true, betDone:{2:true,3:true}}; render(); });
+shot(9,"The reveal","answer shown, wins and losses settled",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"reveal",
   reveal:{answer:1, millIdx:0, results:[
     {idx:1,name:"Barbara",choice:1,bet:2,won:true, balance:21,out:false},
     {idx:2,name:"Pat",    choice:3,bet:3,won:false,balance:15,out:false},
     {idx:3,name:"Chris",  choice:1,bet:1,won:true, balance:21,out:false}
   ]}}; render(); });
-shot(9,"Card 9 — J. Paul Getty","the rewritten investment card",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"answer", card:CARDS[8], cardIdx:8}; render(); });
-shot(10,"Card 11 — the two-option card","the quick palate cleanser mid-game",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"answer", card:CARDS[10], cardIdx:10}; render(); });
+shot(10,"Card 9 — J. Paul Getty","the rewritten investment card",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"answer", card:CARDS[8], cardIdx:8}; render(); });
 shot(11,"Card 20 — Mae West, the closer","always the final card played",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"answer", card:CARDS[19], cardIdx:19}; render(); });
-shot(12,"End of game — Grand Prize","certificate, money rain, Evaluation Form button",()=>{ role="host"; myIdx=0; snap={phase:"end",
+shot(12,"End of game — Grand Prize","Play Again removed; Evaluation Form button only",()=>{ role="host"; myIdx=0; snap={phase:"end",
   players:[
     {name:"Michael",balance:31,eliminated:false,connected:true},
     {name:"Barbara",balance:24,eliminated:false,connected:true},
     {name:"Chris",  balance:20,eliminated:false,connected:true},
     {name:"Pat",    balance:5, eliminated:false,connected:true}
   ], winners:["Michael"], totalCards:20, cardIdx:19, millIdx:0, betDone:{}, card:null, reveal:null}; render(); });
-shot(13,"Error message","example of how problems are reported",()=>{ role=null; snap=null; banner="Room KQ7M not found. Double-check the code — and if the host\u2019s screen went to sleep, the room closed: the host should tap \u2018Host a New Game\u2019 for a fresh code."; landing(); });
+shot(13,"NEW — connection lost","what a dropped player now sees, ready to rejoin",()=>{ role=null; snap=null; roomCode="KQ7M"; myName="Barbara"; banner="Connection lost. Tap Join a Game — your name and the room code are already filled in, and your money is waiting."; landing(); });
 })();
 </script>
 </body>
