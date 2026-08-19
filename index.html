@@ -70,6 +70,9 @@
   .chip.me{box-shadow:0 0 0 1.5px var(--cream);}
   .chip.gone{opacity:.4; font-style:italic;}
   .chip b{color:var(--gold);}
+  .resume-box{border:1px solid var(--gold2); background:rgba(255,199,44,.09); border-radius:20px; padding:16px 16px 20px; margin-top:16px;}
+  .resume-title{font-family:"Trebuchet MS",sans-serif; font-weight:700; color:var(--gold); margin-bottom:6px;}
+  .keybox{max-width:420px; margin:0 auto;}
   .roomline{text-align:center; font-size:.76rem; letter-spacing:.06em; color:rgba(236,224,184,.6); margin-top:9px;}
   .roomline b{color:var(--gold); letter-spacing:.22em; font-size:.9rem;}
   .droppedline{text-align:center; font-size:.76rem; color:var(--orange); margin-top:7px; line-height:1.45;
@@ -124,7 +127,7 @@
 </head>
 <body>
 <div id="app"></div>
-<footer>You Just Became a MILLIONAIRE® &nbsp;•&nbsp; © Time for Two, Inc. 1991, 2016, 2023, 2026 &nbsp;•&nbsp; Multi-device prototype — Draft 10 deck</footer>
+<footer>You Just Became a MILLIONAIRE® &nbsp;•&nbsp; © Time for Two, Inc. 1991, 2016, 2023, 2026 &nbsp;•&nbsp; Multi-device prototype — 29-card deck</footer>
 
 <script id="game-logic">
 /* ============ PURE GAME LOGIC + HOST STATE MACHINE (no DOM) ============ */
@@ -309,6 +312,57 @@ if(typeof module!=="undefined") module.exports = {CARDS, GameLogic, HostGame, ST
 /* ============ NETWORK + UI LAYER ============ */
 (function(){
 if(typeof document==="undefined" || typeof Peer==="undefined") return;
+/* ================= LOCAL STORAGE, RECOVERY & ACCESS ================= */
+const LS = {
+  get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+const HOST_KEY="yjbam.host.v1", ME_KEY="yjbam.me.v1", KEY_STORE="yjbam.key.v1";
+const SAVE_TTL_MS = 6*60*60*1000;   // a saved game is offered for 6 hours
+
+/* --- ACCESS GATE -------------------------------------------------------
+   DORMANT until you have a store. Leave required:false and the game behaves
+   exactly as it does today. To switch it on after setting up Gumroad:
+     required: true,  gumroadProduct: "<your product id>"
+   Note: depending on how the product is created, Gumroad may expect
+   "product_permalink" instead of "product_id" — verify with one real key. */
+const ACCESS = { required:false, gumroadProduct:"" };
+
+function hasAccess(){
+  if(!ACCESS.required) return true;
+  const k = LS.get(KEY_STORE);
+  return !!(k && k.ok);
+}
+async function verifyKey(key){
+  const clean = (key||"").trim();
+  if(!clean) return {ok:false, msg:"Please enter the key from your receipt."};
+  if(!ACCESS.gumroadProduct) return {ok:false, msg:"No product is configured yet."};
+  try{
+    const body = new URLSearchParams({product_id:ACCESS.gumroadProduct, license_key:clean, increment_uses_count:"false"});
+    const r = await fetch("https://api.gumroad.com/v2/licenses/verify", {method:"POST", body});
+    const j = await r.json();
+    if(j && j.success){ LS.set(KEY_STORE,{ok:true, key:clean, at:Date.now()}); return {ok:true}; }
+    return {ok:false, msg:"That key wasn't recognised. Check for typos, or paste it straight from your receipt email."};
+  }catch(e){
+    return {ok:false, msg:"Couldn't reach the licence server. Check your connection and try again."};
+  }
+}
+
+/* --- HOST GAME RECOVERY --- */
+function saveHost(){
+  if(role!=="host" || !G) return;
+  LS.set(HOST_KEY, {code:roomCode, name:myName, at:Date.now(), G:G});
+}
+function savedHost(){
+  const s = LS.get(HOST_KEY);
+  if(!s || !s.G || !s.code) return null;
+  if(Date.now() - (s.at||0) > SAVE_TTL_MS){ LS.del(HOST_KEY); return null; }
+  if(s.G.phase === "end"){ LS.del(HOST_KEY); return null; }
+  return s;
+}
+function clearHost(){ LS.del(HOST_KEY); }
+
 const app = document.getElementById("app");
 let lastScreenKey = null;
 const $ = h => {
@@ -389,7 +443,22 @@ function introScreen(){
 
 /* ---------- LANDING ---------- */
 function landing(){
-  $( brand(false) + `
+  if(!myName || !roomCode){
+    const me = LS.get(ME_KEY);
+    if(me && Date.now()-(me.at||0) < SAVE_TTL_MS){
+      myName = myName || me.name || "";
+      roomCode = roomCode || me.code || "";
+    }
+  }
+  const sv = savedHost();
+  const resumeBlock = sv ? `
+    <div class="resume-box">
+      <div class="resume-title">You have a game in progress</div>
+      <p class="muted" style="font-size:.86rem">Room <b style="color:var(--gold)">${esc(sv.code)}</b> — everyone's money is exactly where it was. The other players rejoin with the same names.</p>
+      <button class="btn-gold" onclick="UI.resume()">Resume that game</button>
+      <button class="btn-ghost" onclick="UI.discard()">Discard it and start fresh</button>
+    </div>` : "";
+  $( brand(false) + resumeBlock + `
   <div class="panel">
     <h2>Play on Multiple Devices</h2>
     <p class="muted">One player hosts and shares the room code. Everyone else joins from a separate device. 3–4 players; everyone starts with <b style="color:var(--gold)">$20 MILLION</b>.</p>
@@ -558,7 +627,7 @@ function endScreen(){
     <div style="margin-top:16px; text-align:left">${stand}</div>
     <p class="muted" style="margin-top:18px; text-align:center;">Thank you for playing our prototype game. Please help us make it even better by filling out this brief Evaluation Form.</p>
     <button class="btn-gold" onclick="location.href='yjbam-evaluation.html'">Evaluation Form →</button>
-    <button class="btn-ghost" onclick="location.reload()">Leave Game</button>
+    <button class="btn-ghost" onclick="UI.leave()">Leave Game</button>
   </div>`);
 }
 
@@ -582,6 +651,7 @@ document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState=
 
 function broadcast(){
   snap = HostGame.snapshot(G);
+  saveHost();
   const msg = {t:"state", snap};
   conns.forEach(c=>{ if(c.open) c.send(msg); });
   lockedThisPhaseReset();
@@ -592,19 +662,40 @@ function lockedThisPhaseReset(){
   if(snap.phase!==lastPhase){ pendingChoice=null; pendingBet=null; lockedThisPhase=false; lastPhase=snap.phase; }
 }
 
-function startHost(){
-  role="host"; roomCode=makeCode();
+let resumeTries = 0;
+function startHost(resumeState){
+  role="host";
+  roomCode = resumeState ? resumeState.code : makeCode();
   banner="";
   keepAwake();
   peer = new Peer(peerId(roomCode), PEER_OPTS);
   peer.on("open", ()=>{
-    G = HostGame.create(myName);
-    myIdx = 0;
+    resumeTries = 0;
+    if(resumeState){
+      /* Restore the game exactly where it stopped. Every other player's
+         connection died with the old page, so they must rejoin by name. */
+      G = resumeState.G;
+      G.players.forEach((p,i)=>{ p.connected = (i===0); });
+      conns = [];
+      myIdx = 0;
+      banner = "Game restored. Ask the other players to rejoin with the same name and this room code.";
+    } else {
+      G = HostGame.create(myName);
+      myIdx = 0;
+    }
     broadcast();
   });
   peer.on("disconnected", ()=>{ try{ peer.reconnect(); }catch(e){} });
   peer.on("error", e=>{
-    if(String(e.type)==="unavailable-id"){ startHost(); return; } // rare code collision → retry
+    if(String(e.type)==="unavailable-id"){
+      if(resumeState){
+        /* Keep the original room code — the broker may still be releasing it. */
+        if(resumeTries++ < 6){ setTimeout(()=>startHost(resumeState), 1500); return; }
+        banner="Couldn't reclaim room "+resumeState.code+". Start a new game instead.";
+        clearHost(); snap=null; landing(); return;
+      }
+      startHost(); return;                                     // fresh game, new code
+    }
     banner="Connection error: "+e.type+". Check your internet connection."; render();
   });
   peer.on("connection", conn=>{
@@ -640,6 +731,7 @@ function handleClientMsg(conn, d){
 
 function startJoin(code){
   role="client"; roomCode=code; banner="";
+  LS.set(ME_KEY, {name:myName, code:code, at:Date.now()});
   keepAwake();
   peer = new Peer(PEER_OPTS);
   peer.on("disconnected", ()=>{ try{ peer.reconnect(); }catch(e){} });
@@ -693,9 +785,35 @@ window.UI = {
     else { hostConn.send({t:"bet", choice:pendingChoice, bet:pendingBet}); lockedThisPhase=true; render(); }
   },
   next(){ if(role==="host" && HostGame.next(G)) broadcast(); },
-  forceOut(i){ if(role==="host" && HostGame.forceOut(G, i)) broadcast(); }
+  forceOut(i){ if(role==="host" && HostGame.forceOut(G, i)) broadcast(); },
+  resume(){
+    const sv = savedHost();
+    if(!sv){ landing(); return; }
+    myName = sv.name || "Host";
+    startHost(sv);
+    $(brand(false)+`<div class="panel waiting"><p class="muted dots">Restoring room ${esc(sv.code)}</p></div>`);
+  },
+  discard(){ clearHost(); snap=null; banner=""; landing(); },
+  leave(){ clearHost(); location.reload(); },
+  async submitKey(){
+    const el = document.getElementById("licKey");
+    const btn = document.getElementById("keyBtn");
+    if(btn){ btn.disabled = true; btn.textContent = "Checking…"; }
+    const res = await verifyKey(el ? el.value : "");
+    if(res.ok) introScreen(); else keyScreen(res.msg);
+  }
 };
-introScreen();
+function keyScreen(msg){
+  $( brand(false) + `
+  <div class="panel keybox">
+    <h2>Enter your key</h2>
+    <p class="muted">Thank you for buying <b>You Just Became a MILLIONAIRE&reg;</b>. Paste the key from your receipt email to unlock the game on this device. You only need to do this once.</p>
+    <input type="text" id="licKey" maxlength="64" placeholder="Your key" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <button class="btn-gold" id="keyBtn" onclick="UI.submitKey()">Unlock the Game</button>
+    ${msg ? `<div class="banner">${esc(msg)}</div>` : ""}
+  </div>`);
+}
+if(hasAccess()) introScreen(); else keyScreen();
 })();
 </script>
 </body>

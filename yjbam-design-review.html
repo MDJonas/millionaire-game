@@ -69,6 +69,9 @@
   .chip.me{box-shadow:0 0 0 1.5px var(--cream);}
   .chip.gone{opacity:.4; font-style:italic;}
   .chip b{color:var(--gold);}
+  .resume-box{border:1px solid var(--gold2); background:rgba(255,199,44,.09); border-radius:20px; padding:16px 16px 20px; margin-top:16px;}
+  .resume-title{font-family:"Trebuchet MS",sans-serif; font-weight:700; color:var(--gold); margin-bottom:6px;}
+  .keybox{max-width:420px; margin:0 auto;}
   .roomline{text-align:center; font-size:.76rem; letter-spacing:.06em; color:rgba(236,224,184,.6); margin-top:9px;}
   .roomline b{color:var(--gold); letter-spacing:.22em; font-size:.9rem;}
   .droppedline{text-align:center; font-size:.76rem; color:var(--orange); margin-top:7px; line-height:1.45;
@@ -316,6 +319,57 @@ if(typeof module!=="undefined") module.exports = {CARDS, GameLogic, HostGame, ST
 /* ============ NETWORK + UI LAYER ============ */
 (function(){
 if(typeof document==="undefined") return;
+/* ================= LOCAL STORAGE, RECOVERY & ACCESS ================= */
+const LS = {
+  get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+const HOST_KEY="yjbam.host.v1", ME_KEY="yjbam.me.v1", KEY_STORE="yjbam.key.v1";
+const SAVE_TTL_MS = 6*60*60*1000;   // a saved game is offered for 6 hours
+
+/* --- ACCESS GATE -------------------------------------------------------
+   DORMANT until you have a store. Leave required:false and the game behaves
+   exactly as it does today. To switch it on after setting up Gumroad:
+     required: true,  gumroadProduct: "<your product id>"
+   Note: depending on how the product is created, Gumroad may expect
+   "product_permalink" instead of "product_id" — verify with one real key. */
+const ACCESS = { required:false, gumroadProduct:"" };
+
+function hasAccess(){
+  if(!ACCESS.required) return true;
+  const k = LS.get(KEY_STORE);
+  return !!(k && k.ok);
+}
+async function verifyKey(key){
+  const clean = (key||"").trim();
+  if(!clean) return {ok:false, msg:"Please enter the key from your receipt."};
+  if(!ACCESS.gumroadProduct) return {ok:false, msg:"No product is configured yet."};
+  try{
+    const body = new URLSearchParams({product_id:ACCESS.gumroadProduct, license_key:clean, increment_uses_count:"false"});
+    const r = await fetch("https://api.gumroad.com/v2/licenses/verify", {method:"POST", body});
+    const j = await r.json();
+    if(j && j.success){ LS.set(KEY_STORE,{ok:true, key:clean, at:Date.now()}); return {ok:true}; }
+    return {ok:false, msg:"That key wasn't recognised. Check for typos, or paste it straight from your receipt email."};
+  }catch(e){
+    return {ok:false, msg:"Couldn't reach the licence server. Check your connection and try again."};
+  }
+}
+
+/* --- HOST GAME RECOVERY --- */
+function saveHost(){
+  if(role!=="host" || !G) return;
+  LS.set(HOST_KEY, {code:roomCode, name:myName, at:Date.now(), G:G});
+}
+function savedHost(){
+  const s = LS.get(HOST_KEY);
+  if(!s || !s.G || !s.code) return null;
+  if(Date.now() - (s.at||0) > SAVE_TTL_MS){ LS.del(HOST_KEY); return null; }
+  if(s.G.phase === "end"){ LS.del(HOST_KEY); return null; }
+  return s;
+}
+function clearHost(){ LS.del(HOST_KEY); }
+
 const app = document.getElementById("app");
 let lastScreenKey = null;
 const $ = h => {
@@ -396,7 +450,22 @@ function introScreen(){
 
 /* ---------- LANDING ---------- */
 function landing(){
-  $( brand(false) + `
+  if(!myName || !roomCode){
+    const me = LS.get(ME_KEY);
+    if(me && Date.now()-(me.at||0) < SAVE_TTL_MS){
+      myName = myName || me.name || "";
+      roomCode = roomCode || me.code || "";
+    }
+  }
+  const sv = savedHost();
+  const resumeBlock = sv ? `
+    <div class="resume-box">
+      <div class="resume-title">You have a game in progress</div>
+      <p class="muted" style="font-size:.86rem">Room <b style="color:var(--gold)">${esc(sv.code)}</b> — everyone's money is exactly where it was. The other players rejoin with the same names.</p>
+      <button class="btn-gold" onclick="UI.resume()">Resume that game</button>
+      <button class="btn-ghost" onclick="UI.discard()">Discard it and start fresh</button>
+    </div>` : "";
+  $( brand(false) + resumeBlock + `
   <div class="panel">
     <h2>Play on Multiple Devices</h2>
     <p class="muted">One player hosts and shares the room code. Everyone else joins from a separate device. 3–4 players; everyone starts with <b style="color:var(--gold)">$20 MILLION</b>.</p>
@@ -565,7 +634,7 @@ function endScreen(){
     <div style="margin-top:16px; text-align:left">${stand}</div>
     <p class="muted" style="margin-top:18px; text-align:center;">Thank you for playing our prototype game. Please help us make it even better by filling out this brief Evaluation Form.</p>
     <button class="btn-gold" onclick="location.href='yjbam-evaluation.html'">Evaluation Form →</button>
-    <button class="btn-ghost" onclick="location.reload()">Leave Game</button>
+    <button class="btn-ghost" onclick="UI.leave()">Leave Game</button>
   </div>`);
 }
 
@@ -589,6 +658,7 @@ document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState=
 
 function broadcast(){
   snap = HostGame.snapshot(G);
+  saveHost();
   const msg = {t:"state", snap};
   conns.forEach(c=>{ if(c.open) c.send(msg); });
   lockedThisPhaseReset();
@@ -599,19 +669,40 @@ function lockedThisPhaseReset(){
   if(snap.phase!==lastPhase){ pendingChoice=null; pendingBet=null; lockedThisPhase=false; lastPhase=snap.phase; }
 }
 
-function startHost(){
-  role="host"; roomCode=makeCode();
+let resumeTries = 0;
+function startHost(resumeState){
+  role="host";
+  roomCode = resumeState ? resumeState.code : makeCode();
   banner="";
   keepAwake();
   peer = new Peer(peerId(roomCode), PEER_OPTS);
   peer.on("open", ()=>{
-    G = HostGame.create(myName);
-    myIdx = 0;
+    resumeTries = 0;
+    if(resumeState){
+      /* Restore the game exactly where it stopped. Every other player's
+         connection died with the old page, so they must rejoin by name. */
+      G = resumeState.G;
+      G.players.forEach((p,i)=>{ p.connected = (i===0); });
+      conns = [];
+      myIdx = 0;
+      banner = "Game restored. Ask the other players to rejoin with the same name and this room code.";
+    } else {
+      G = HostGame.create(myName);
+      myIdx = 0;
+    }
     broadcast();
   });
   peer.on("disconnected", ()=>{ try{ peer.reconnect(); }catch(e){} });
   peer.on("error", e=>{
-    if(String(e.type)==="unavailable-id"){ startHost(); return; } // rare code collision → retry
+    if(String(e.type)==="unavailable-id"){
+      if(resumeState){
+        /* Keep the original room code — the broker may still be releasing it. */
+        if(resumeTries++ < 6){ setTimeout(()=>startHost(resumeState), 1500); return; }
+        banner="Couldn't reclaim room "+resumeState.code+". Start a new game instead.";
+        clearHost(); snap=null; landing(); return;
+      }
+      startHost(); return;                                     // fresh game, new code
+    }
     banner="Connection error: "+e.type+". Check your internet connection."; render();
   });
   peer.on("connection", conn=>{
@@ -647,6 +738,7 @@ function handleClientMsg(conn, d){
 
 function startJoin(code){
   role="client"; roomCode=code; banner="";
+  LS.set(ME_KEY, {name:myName, code:code, at:Date.now()});
   keepAwake();
   peer = new Peer(PEER_OPTS);
   peer.on("disconnected", ()=>{ try{ peer.reconnect(); }catch(e){} });
@@ -700,18 +792,42 @@ window.UI = {
     else { hostConn.send({t:"bet", choice:pendingChoice, bet:pendingBet}); lockedThisPhase=true; render(); }
   },
   next(){ if(role==="host" && HostGame.next(G)) broadcast(); },
-  forceOut(i){ if(role==="host" && HostGame.forceOut(G, i)) broadcast(); }
+  forceOut(i){ if(role==="host" && HostGame.forceOut(G, i)) broadcast(); },
+  resume(){
+    const sv = savedHost();
+    if(!sv){ landing(); return; }
+    myName = sv.name || "Host";
+    startHost(sv);
+    $(brand(false)+`<div class="panel waiting"><p class="muted dots">Restoring room ${esc(sv.code)}</p></div>`);
+  },
+  discard(){ clearHost(); snap=null; banner=""; landing(); },
+  leave(){ clearHost(); location.reload(); },
+  async submitKey(){
+    const el = document.getElementById("licKey");
+    const btn = document.getElementById("keyBtn");
+    if(btn){ btn.disabled = true; btn.textContent = "Checking…"; }
+    const res = await verifyKey(el ? el.value : "");
+    if(res.ok) introScreen(); else keyScreen(res.msg);
+  }
 };
+function keyScreen(msg){
+  $( brand(false) + `
+  <div class="panel keybox">
+    <h2>Enter your key</h2>
+    <p class="muted">Thank you for buying <b>You Just Became a MILLIONAIRE&reg;</b>. Paste the key from your receipt email to unlock the game on this device. You only need to do this once.</p>
+    <input type="text" id="licKey" maxlength="64" placeholder="Your key" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <button class="btn-gold" id="keyBtn" onclick="UI.submitKey()">Unlock the Game</button>
+    ${msg ? `<div class="banner">${esc(msg)}</div>` : ""}
+  </div>`);
+}
 /* ---------- DESIGN REVIEW GALLERY ---------- */
-const gallery = document.getElementById("gallery");
-gallery.innerHTML = `<div class="gallery-intro">
+const gallery=document.getElementById("gallery");
+gallery.innerHTML=`<div class="gallery-intro">
   <h1>Design Review — every screen of the game</h1>
-  <p>Updated 8/2 from the first 10 evaluations: every player now sees the answer choices while the
-  Millionaire is deciding; the room code stays on screen throughout; a dropped player can rejoin
-  mid-game; tapping an option no longer jumps the page; Play Again removed.
-  Note requests by screen number.</p>
+  <p>Round 2 build. New since last time: the host can recover a game after a crash or lost
+  connection (Screen 2), and the room code now stays on screen throughout. Note requests by screen number.</p>
 </div>`;
-function shot(num, title, note, setup){
+function shot(num,title,note,setup){
   banner=""; pendingChoice=null; pendingBet=null;
   setup();
   const sec=document.createElement("section");
@@ -720,43 +836,45 @@ function shot(num, title, note, setup){
   gallery.appendChild(sec);
 }
 const P4=[
-  {name:"Michael", balance:23, eliminated:false, connected:true},
-  {name:"Barbara", balance:19, eliminated:false, connected:true},
-  {name:"Pat", balance:18, eliminated:false, connected:true},
-  {name:"Chris", balance:20, eliminated:false, connected:true}
-];
+  {name:"Michael",balance:23,eliminated:false,connected:true},
+  {name:"Barbara",balance:19,eliminated:false,connected:true},
+  {name:"Pat",balance:18,eliminated:false,connected:true},
+  {name:"Chris",balance:20,eliminated:false,connected:true}];
 const PDROP=[
-  {name:"Michael", balance:23, eliminated:false, connected:true},
-  {name:"Barbara", balance:19, eliminated:false, connected:false},
-  {name:"Pat", balance:18, eliminated:false, connected:true},
-  {name:"Chris", balance:20, eliminated:false, connected:true}
-];
-const baseSnap={phase:"lobby", players:P4, millIdx:0, cardIdx:0, totalCards:20, card:CARDS[0], answered:false, betDone:{}, reveal:null, winners:null};
+  {name:"Michael",balance:23,eliminated:false,connected:true},
+  {name:"Barbara",balance:19,eliminated:false,connected:false},
+  {name:"Pat",balance:18,eliminated:false,connected:true},
+  {name:"Chris",balance:20,eliminated:false,connected:true}];
+const baseSnap={phase:"lobby",players:P4,millIdx:0,cardIdx:0,totalCards:20,card:CARDS[0],answered:false,betDone:{},reveal:null,winners:null};
 
-shot(1,"Introduction page","How to Play, 5 rounds, 3–4 players",()=>{ role=null; snap=null; myIdx=0; introScreen(); });
-shot(2,"Welcome page","room code now pre-filled if you were dropped",()=>{ role=null; snap=null; myIdx=0; roomCode=""; landing(); });
-shot(3,"Lobby — host's view","room code and player list",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap}; render(); });
-shot(4,"The Millionaire's card","NEW: room code now sits under the scoreboard",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"answer"}; pendingChoice=1; render(); });
-shot(5,"A player while the Millionaire decides","NEW: the four choices are now visible to everyone",()=>{ role="client"; roomCode="KQ7M"; myIdx=1; snap={...baseSnap, phase:"answer"}; render(); });
-shot(6,"Betting screen","guess + bet (option B and $2M selected)",()=>{ role="client"; roomCode="KQ7M"; myIdx=1; snap={...baseSnap, phase:"betting", answered:true}; pendingChoice=1; pendingBet=2; render(); });
-shot(7,"Waiting for bets","the Millionaire watches bets lock in",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"betting", answered:true, betDone:{1:true,2:true}}; render(); });
-shot(8,"NEW — a player has dropped out","host sees the warning and can continue without them",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, players:PDROP, phase:"betting", answered:true, betDone:{2:true,3:true}}; render(); });
-shot(9,"The reveal","answer shown, wins and losses settled",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"reveal",
-  reveal:{answer:1, millIdx:0, results:[
-    {idx:1,name:"Barbara",choice:1,bet:2,won:true, balance:21,out:false},
-    {idx:2,name:"Pat",    choice:3,bet:3,won:false,balance:15,out:false},
-    {idx:3,name:"Chris",  choice:1,bet:1,won:true, balance:21,out:false}
-  ]}}; render(); });
-shot(10,"Card 9 — J. Paul Getty","the rewritten investment card",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"answer", card:CARDS[8], cardIdx:8}; render(); });
-shot(11,"Card 20 — Mae West, the closer","always the final card played",()=>{ role="host"; roomCode="KQ7M"; myIdx=0; snap={...baseSnap, phase:"answer", card:CARDS[19], cardIdx:19}; render(); });
-shot(12,"End of game — Grand Prize","Play Again removed; Evaluation Form button only",()=>{ role="host"; myIdx=0; snap={phase:"end",
-  players:[
-    {name:"Michael",balance:31,eliminated:false,connected:true},
-    {name:"Barbara",balance:24,eliminated:false,connected:true},
-    {name:"Chris",  balance:20,eliminated:false,connected:true},
-    {name:"Pat",    balance:5, eliminated:false,connected:true}
-  ], winners:["Michael"], totalCards:20, cardIdx:19, millIdx:0, betDone:{}, card:null, reveal:null}; render(); });
-shot(13,"NEW — connection lost","what a dropped player now sees, ready to rejoin",()=>{ role=null; snap=null; roomCode="KQ7M"; myName="Barbara"; banner="Connection lost. Tap Join a Game — your name and the room code are already filled in, and your money is waiting."; landing(); });
+shot(1,"Introduction page","How to Play, 5 rounds, 3–4 players",()=>{role=null;snap=null;myIdx=0;roomCode="";introScreen();});
+shot(2,"NEW — a game was interrupted","offered to the host after a crash or reload",()=>{
+  role=null;snap=null;myIdx=0;roomCode="";
+  LS.set("yjbam.host.v1",{code:"KQ7M",name:"Michael",at:Date.now(),
+    G:{phase:"answer",players:P4,deck:[CARDS[0]],cardIdx:0,millIdx:0,turn:{answer:null,bets:{}},lastResults:null,winners:null}});
+  landing(); LS.del("yjbam.host.v1");});
+shot(3,"Welcome page","host or join",()=>{role=null;snap=null;myIdx=0;roomCode="";landing();});
+shot(4,"Lobby — host's view","room code and player list",()=>{role="host";roomCode="KQ7M";myIdx=0;snap={...baseSnap};render();});
+shot(5,"The Millionaire's card","room code sits under the scoreboard",()=>{role="host";roomCode="KQ7M";myIdx=0;snap={...baseSnap,phase:"answer"};pendingChoice=1;render();});
+shot(6,"A player while the Millionaire decides","all four choices visible to everyone",()=>{role="client";roomCode="KQ7M";myIdx=1;snap={...baseSnap,phase:"answer"};render();});
+shot(7,"Betting screen","guess + bet (option B and $2M selected)",()=>{role="client";roomCode="KQ7M";myIdx=1;snap={...baseSnap,phase:"betting",answered:true};pendingChoice=1;pendingBet=2;render();});
+shot(8,"Waiting for bets","the Millionaire watches bets lock in",()=>{role="host";roomCode="KQ7M";myIdx=0;snap={...baseSnap,phase:"betting",answered:true,betDone:{1:true,2:true}};render();});
+shot(9,"A player has dropped out","host is told, and can continue without them",()=>{role="host";roomCode="KQ7M";myIdx=0;snap={...baseSnap,players:PDROP,phase:"betting",answered:true,betDone:{2:true,3:true}};render();});
+shot(10,"The reveal","answer shown, wins and losses settled",()=>{role="host";roomCode="KQ7M";myIdx=0;snap={...baseSnap,phase:"reveal",
+  reveal:{answer:1,millIdx:0,results:[
+    {idx:1,name:"Barbara",choice:1,bet:2,won:true,balance:21,out:false},
+    {idx:2,name:"Pat",choice:3,bet:3,won:false,balance:15,out:false},
+    {idx:3,name:"Chris",choice:1,bet:1,won:true,balance:21,out:false}]}};render();});
+shot(11,"Card 9 — J. Paul Getty","the rewritten investment card",()=>{role="host";roomCode="KQ7M";myIdx=0;snap={...baseSnap,phase:"answer",card:CARDS[8],cardIdx:8};render();});
+shot(12,"Card 20 — Mae West, the closer","always the final card played",()=>{role="host";roomCode="KQ7M";myIdx=0;snap={...baseSnap,phase:"answer",card:CARDS[19],cardIdx:19};render();});
+shot(13,"End of game — Grand Prize","Evaluation Form button",()=>{role="host";myIdx=0;roomCode="KQ7M";snap={phase:"end",
+  players:[{name:"Michael",balance:31,eliminated:false,connected:true},
+           {name:"Barbara",balance:24,eliminated:false,connected:true},
+           {name:"Chris",balance:20,eliminated:false,connected:true},
+           {name:"Pat",balance:5,eliminated:false,connected:true}],
+  winners:["Michael"],totalCards:20,cardIdx:19,millIdx:0,betDone:{},card:null,reveal:null};render();});
+shot(14,"Connection lost","what a dropped player sees, ready to rejoin",()=>{role=null;snap=null;roomCode="KQ7M";myName="Barbara";
+  banner="Connection lost. Tap Join a Game — your name and the room code are already filled in, and your money is waiting.";landing();});
 })();
 </script>
 </body>
