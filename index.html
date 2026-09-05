@@ -466,7 +466,7 @@ function landing(){
     <button class="btn-gold" onclick="UI.host()">Host a New Game</button>
     <div class="section-label">— or —</div>
     <input type="text" id="code" maxlength="4" placeholder="Room code (e.g. KQ7M)" value="${esc(roomCode)}" style="text-transform:uppercase; text-align:center; letter-spacing:.3em">
-    <button class="btn-ghost" onclick="UI.join()">Join a Game</button>
+    <button class="btn-ghost" onclick="UI.join()">Join the Game</button>
     ${bannerHtml()}
   </div>`);
 }
@@ -481,7 +481,7 @@ function lobbyScreen(){
   <div class="panel">
     <h2 style="text-align:center">Room Code</h2>
     <div class="code-display">${esc(roomCode)}</div>
-    <p class="muted" style="text-align:center">Others: open this same file (or page) on your device,<br>enter your name and this code, and tap <i>Join</i>.</p>
+    <p class="muted" style="text-align:center">Others: open this same file (or page) on your device,<br>enter your name and this code, and tap <i>Join the Game</i>.</p>
     <div style="margin-top:16px">${rows}</div>
     <p class="muted" style="text-align:center; margin-top:12px">${info}</p>
     ${role==="host" ? `<button class="btn-gold" ${n<3?"disabled":""} onclick="UI.start()">Start the Game</button>`
@@ -745,7 +745,7 @@ function startJoin(code){
       else if(d.t==="state"){ snap=d.snap; lockedThisPhaseReset(); render(); }
     });
     hostConn.on("close", ()=>{
-      banner = "Connection lost. Tap Join a Game — your name and the room code are already filled in, and your money is waiting.";
+      banner = "Connection lost. Tap Join the Game — your name and the room code are already filled in, and your money is waiting.";
       snap = null; landing();
     });
     setTimeout(()=>{ if(!joined && !banner){ banner="Could not reach room "+code+". Make sure the host's screen is ON with the game page open, then try again."; snap=null; landing(); } }, 10000);
